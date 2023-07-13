@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "V1VE7c+M6c3P6ZiDIQ2gEObo8RgNj0s/n5H5UpQZrPcvPJFsrzqwmEy2QbeHgfdE2czPKwnMvCCFhAC/1WRO0w==",
+  "success": true,
+  "projectFilePath": "/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/05/05.csproj",
+  "expectedPackageFiles": [
+    "/home/ukaszoro/.nuget/packages/microsoft.aspnetcore.app.ref/7.0.3/microsoft.aspnetcore.app.ref.7.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

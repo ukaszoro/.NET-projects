@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "dgSpecHash": "8QcVIFbLeKlZo3yAa1QwSVps/OwCzgAauokgx7jpbeEKhhoVNn4oIZrq3GT9I2Ct/tE+8UX/k7gHzAbvyCQ+PQ==",
+  "success": true,
+  "projectFilePath": "/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/Tetris/Tetris.csproj",
+  "expectedPackageFiles": [
+    "/home/ukaszoro/.nuget/packages/microsoft.netcore.platforms/3.1.0/microsoft.netcore.platforms.3.1.0.nupkg.sha512",
+    "/home/ukaszoro/.nuget/packages/microsoft.win32.registry/4.7.0/microsoft.win32.registry.4.7.0.nupkg.sha512",
+    "/home/ukaszoro/.nuget/packages/naudio.core/2.1.0/naudio.core.2.1.0.nupkg.sha512",
+    "/home/ukaszoro/.nuget/packages/naudio.winmm/2.1.0/naudio.winmm.2.1.0.nupkg.sha512",
+    "/home/ukaszoro/.nuget/packages/sayers.sdl2.core/1.0.11/sayers.sdl2.core.1.0.11.nupkg.sha512",
+    "/home/ukaszoro/.nuget/packages/system.security.accesscontrol/4.7.0/system.security.accesscontrol.4.7.0.nupkg.sha512",
+    "/home/ukaszoro/.nuget/packages/system.security.principal.windows/4.7.0/system.security.principal.windows.4.7.0.nupkg.sha512",
+    "/home/ukaszoro/.nuget/packages/microsoft.aspnetcore.app.ref/7.0.3/microsoft.aspnetcore.app.ref.7.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

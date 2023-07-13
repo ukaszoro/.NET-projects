@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "oLdexn3BxMGELSyK6Le26zMkS9KVTjA0JgXRSss5zihoCmqsv/oeUxlbRhueoReVNfQK5wPZHHR1dx55+GqCxA==",
+  "success": true,
+  "projectFilePath": "/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/04-butmore.csproj",
+  "expectedPackageFiles": [
+    "/home/ukaszoro/.nuget/packages/microsoft.aspnetcore.app.ref/7.0.3/microsoft.aspnetcore.app.ref.7.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

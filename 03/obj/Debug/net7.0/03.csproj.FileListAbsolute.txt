@@ -1,0 +1,15 @@
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/bin/Debug/net7.0/03
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/bin/Debug/net7.0/03.deps.json
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/bin/Debug/net7.0/03.runtimeconfig.json
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/bin/Debug/net7.0/03.dll
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/bin/Debug/net7.0/03.pdb
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/obj/Debug/net7.0/03.csproj.AssemblyReference.cache
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/obj/Debug/net7.0/03.GeneratedMSBuildEditorConfig.editorconfig
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/obj/Debug/net7.0/03.AssemblyInfoInputs.cache
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/obj/Debug/net7.0/03.AssemblyInfo.cs
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/obj/Debug/net7.0/03.csproj.CoreCompileInputs.cache
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/obj/Debug/net7.0/03.dll
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/obj/Debug/net7.0/refint/03.dll
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/obj/Debug/net7.0/03.pdb
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/obj/Debug/net7.0/03.genruntimeconfig.cache
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/03/obj/Debug/net7.0/ref/03.dll

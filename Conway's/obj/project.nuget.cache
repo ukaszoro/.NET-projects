@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "ngKCDcBneW6XgtapHA+7ueKR6F4siraAk27he2/w4cfkbi5ckGXShljvcX1aBa9XlcDHNNyb/fcz3WAklmtGAQ==",
+  "success": true,
+  "projectFilePath": "/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/Conway's/Conway's.csproj",
+  "expectedPackageFiles": [
+    "/home/ukaszoro/.nuget/packages/sayers.sdl2.core/1.0.11/sayers.sdl2.core.1.0.11.nupkg.sha512",
+    "/home/ukaszoro/.nuget/packages/microsoft.aspnetcore.app.ref/7.0.7/microsoft.aspnetcore.app.ref.7.0.7.nupkg.sha512"
+  ],
+  "logs": []
+}

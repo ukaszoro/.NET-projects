@@ -1,0 +1,15 @@
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/obj/Debug/net7.0/04-butmore.csproj.AssemblyReference.cache
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/obj/Debug/net7.0/04-butmore.GeneratedMSBuildEditorConfig.editorconfig
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/obj/Debug/net7.0/04-butmore.AssemblyInfoInputs.cache
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/obj/Debug/net7.0/04-butmore.AssemblyInfo.cs
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/obj/Debug/net7.0/04-butmore.csproj.CoreCompileInputs.cache
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/bin/Debug/net7.0/04-butmore
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/bin/Debug/net7.0/04-butmore.deps.json
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/bin/Debug/net7.0/04-butmore.runtimeconfig.json
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/bin/Debug/net7.0/04-butmore.dll
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/bin/Debug/net7.0/04-butmore.pdb
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/obj/Debug/net7.0/04-butmore.dll
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/obj/Debug/net7.0/refint/04-butmore.dll
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/obj/Debug/net7.0/04-butmore.pdb
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/obj/Debug/net7.0/04-butmore.genruntimeconfig.cache
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/04-butmore/obj/Debug/net7.0/ref/04-butmore.dll

@@ -1,0 +1,102 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+
+// Define the Disk class representing a single disk
+class Disk
+{
+    public int Size { get; }
+
+    public Disk(int size)
+    {
+        Size = size;
+    }
+}
+
+// Define the Tower class representing a tower in the Hanoi Tower problem
+class Tower
+{
+    private readonly List<Disk> disks = new List<Disk>();
+
+    public void AddDisk(Disk disk)
+    {
+        disks.Add(disk);
+    }
+
+    public Disk RemoveTopDisk()
+    {
+        if (disks.Count == 0)
+            return null;
+
+        var topDisk = disks[disks.Count - 1];
+        disks.RemoveAt(disks.Count - 1);
+        return topDisk;
+    }
+}
+
+class HanoiTowerSolver
+{
+    private readonly Tower towerA;
+    private readonly Tower towerB;
+    private readonly Tower towerC;
+
+    public HanoiTowerSolver()
+    {
+        towerA = new Tower();
+        towerB = new Tower();
+        towerC = new Tower();
+    }
+
+    public void Solve(int numDisks)
+    {
+        // Move the disks from tower A to tower C using tower B as the auxiliary tower
+        MoveDisks(numDisks, towerA, towerC, towerB);
+    }
+
+    private void MoveDisks(int numDisks, Tower source, Tower target, Tower auxiliary)
+    {
+        if (numDisks > 0)
+        {
+            MoveDisks(numDisks - 1, source, auxiliary, target);
+
+            var disk = source.RemoveTopDisk();
+            target.AddDisk(disk);
+
+            // Notify the drawing thread that a disk movement has occurred
+
+            MoveDisks(numDisks - 1, auxiliary, target, source);
+        }
+    }
+}
+
+class Program
+{
+    // Define the drawing thread method
+    private static void DrawThread()
+    {
+        // SDL2 drawing logic goes here
+        // Continuously update the visual representation of the towers and disks
+    }
+
+    static void Main()
+    {
+        // Create an instance of the HanoiTowerSolver
+        var solver = new HanoiTowerSolver();
+
+        // Create the drawing thread
+        var drawThread = new Thread(DrawThread);
+        drawThread.Start();
+
+        // Solve the Hanoi Tower problem in a separate thread
+        var solveThread = new Thread(() => solver.Solve(3));
+        solveThread.Start();
+
+        // Wait for the solveThread to complete
+        solveThread.Join();
+
+        // Stop the drawThread gracefully
+
+        // Perform any necessary cleanup
+    }
+}
+

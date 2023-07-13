@@ -1,0 +1,17 @@
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/obj/Debug/net7.0/74-sdl2.csproj.AssemblyReference.cache
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/obj/Debug/net7.0/74-sdl2.GeneratedMSBuildEditorConfig.editorconfig
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/obj/Debug/net7.0/74-sdl2.AssemblyInfoInputs.cache
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/obj/Debug/net7.0/74-sdl2.AssemblyInfo.cs
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/obj/Debug/net7.0/74-sdl2.csproj.CoreCompileInputs.cache
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/bin/Debug/net7.0/74-sdl2
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/bin/Debug/net7.0/74-sdl2.deps.json
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/bin/Debug/net7.0/74-sdl2.runtimeconfig.json
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/bin/Debug/net7.0/74-sdl2.dll
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/bin/Debug/net7.0/74-sdl2.pdb
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/bin/Debug/net7.0/Sayers.SDL2.Core.dll
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/obj/Debug/net7.0/74-sdl2.csproj.CopyComplete
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/obj/Debug/net7.0/74-sdl2.dll
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/obj/Debug/net7.0/refint/74-sdl2.dll
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/obj/Debug/net7.0/74-sdl2.pdb
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/obj/Debug/net7.0/74-sdl2.genruntimeconfig.cache
+/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/74-sdl2/obj/Debug/net7.0/ref/74-sdl2.dll
