@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/Conway's/Conway's.csproj": {}
+    "/home/ukaszoro/Documents/qiustaff/dottodottoneto/Conway's/Conway's.csproj": {}
   },
   "projects": {
-    "/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/Conway's/Conway's.csproj": {
+    "/home/ukaszoro/Documents/qiustaff/dottodottoneto/Conway's/Conway's.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/Conway's/Conway's.csproj",
+        "projectUniqueName": "/home/ukaszoro/Documents/qiustaff/dottodottoneto/Conway's/Conway's.csproj",
         "projectName": "Conway's",
-        "projectPath": "/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/Conway's/Conway's.csproj",
+        "projectPath": "/home/ukaszoro/Documents/qiustaff/dottodottoneto/Conway's/Conway's.csproj",
         "packagesPath": "/home/ukaszoro/.nuget/packages/",
-        "outputPath": "/home/ukaszoro/Documents/qiustaff/dottodottoneto/qiu/Conway's/obj/",
+        "outputPath": "/home/ukaszoro/Documents/qiustaff/dottodottoneto/Conway's/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/ukaszoro/.nuget/NuGet/NuGet.Config"

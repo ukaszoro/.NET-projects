@@ -17,24 +17,33 @@ partial class Program
     static int Cam_pos_y= 0;
     static int Zoom  = 100;
     static bool Running  = true;
+    static int Time_speed = 200; // interval how often the program makes a new generation
     public Program(int n, int m)
     {
         this.Mutex = new Mutex();
         this.Grid = new int[n, m];
-        this.Input = new bool[3];
+        this.Input = new bool[5];
     }
     
     static void Main()
     {
-        
-        string input = Console.ReadLine();
+        Console.WriteLine("Welcome to Uka's Conway's game of life\n\nControls:\nClick and drag with your mouse to move the board\nScroll to zoom in or out\nHover over a block and click space to change it's value(alive/dead)\nClick return to start/stop the simulation\nUse - and = to slow down/speed up time\n//The terminal will return usefull information so make sure you can see it//\n");
+        Console.WriteLine("Input the innitial hight of the window(it can be resized later): ");
+        string? input = Console.ReadLine();
         if (!Int32.TryParse(input, out int height)) {
 			Console.WriteLine("Something went wrong");
 			Environment.Exit(1);
 		}
         Program.W_height = height;
         W_width = height;
-        var program = new Program(100, 100);
+
+        Console.WriteLine("Input the size of the board you want to simulate(it'll be a square so input one value): ");
+        input = Console.ReadLine();
+        if (!Int32.TryParse(input, out int size)) {
+			Console.WriteLine("Something went wrong");
+			Environment.Exit(1);
+		}
+        var program = new Program(size, size);
 
         
         // Create the drawing thread
@@ -54,7 +63,7 @@ partial class Program
         {
             if (Input[2] == true) {
                 Next_Gen();
-                Thread.Sleep(100);
+                Thread.Sleep(Time_speed);
             }
             
         }
@@ -71,7 +80,6 @@ partial class Program
         {
             for (int m = 1; m < N - 1; m++)
             {
-                 
                 // finding no Of Neighbours
                 // that are alive
                 int aliveNeighbours = 0;
@@ -127,7 +135,7 @@ partial class Program
 
         // Create a new window given a title, size, and passes it a flag indicating it should be shown.
         window = SDL.SDL_CreateWindow(
-            "Uka's game of life SDL .NET 7",
+            "Uka's game of life SDL2 .NET 7",
             SDL.SDL_WINDOWPOS_UNDEFINED, 
             SDL.SDL_WINDOWPOS_UNDEFINED, 
             Program.W_width, 
@@ -201,10 +209,20 @@ partial class Program
                                 }
                             Mutex.ReleaseMutex();
                             break;
+                        case SDL.SDL_Keycode.SDLK_MINUS:
+                            if (Time_speed >= 20)
+                                Time_speed = Time_speed - 20;
+                            Console.WriteLine($"Interval between generations: {Time_speed}");
+                            break;
+
+                        case SDL.SDL_Keycode.SDLK_EQUALS:
+                            Time_speed = Time_speed + 20;
+                            Console.WriteLine($"Interval between generations: {Time_speed}");
+                            break;
 
                         case SDL.SDL_Keycode.SDLK_RETURN:
                             Input[2] = Input[2] ^ true;
-                            Console.WriteLine($"{Input[2]}");
+                            Console.WriteLine("Simulation " + (Input[2] == true ? "start" : "stop"));
                             break;
                     }
                     break;
