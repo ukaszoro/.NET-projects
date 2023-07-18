@@ -2,14 +2,16 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.IO;
 
 namespace Platformer2D;
 
 public class Game1 : Game
 {
-    Player player1;
+    Player player;
     EntityManager e_manager;
     static float world_gravity = 10f;
+    Level level;
 
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
@@ -24,11 +26,9 @@ public class Game1 : Game
     protected override void Initialize()
     {
         // TODO: Add your initialization logic here
-        player1 = new Player(ref _graphics, world_gravity);
-        player1.UpdateOrder = 1;
-        e_manager = new EntityManager();
-        e_manager.AddEntity(player1);
-        
+        level = new(File.Open("./Maps/Map0", FileMode.Open), 0, Content);
+        // player.UpdateOrder = 1;
+
         base.Initialize();
     }
 
@@ -37,7 +37,7 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // TODO: use this.Content to load your game content here
-        player1.texture = Content.Load<Texture2D>("player");
+        
     }
 
     protected override void Update(GameTime gameTime)
@@ -46,16 +46,17 @@ public class Game1 : Game
             Exit();
 
         // TODO: Add your update logic here
-        e_manager.Update(gameTime); 
+        level.Update(gameTime);
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-
+        _spriteBatch.Begin();
         // TODO: Add your drawing code here
-        e_manager.Draw(_spriteBatch, gameTime);
+        level.Draw(_spriteBatch, gameTime);
+        _spriteBatch.End();
         base.Draw(gameTime);
     }
 }

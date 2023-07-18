@@ -11,16 +11,12 @@ public interface IGameEntity
     int DrawOrder { get; }
     int UpdateOrder { get; }
     void Update(GameTime gameTime);
-    void Draw(SpriteBatch spriteBatch, GameTime gameTime);
-    
+    void Draw(SpriteBatch spriteBatch, GameTime gameTime);    
 }
 
 public class EntityManager
 {
     private readonly List<IGameEntity> _entities = new List<IGameEntity>();
-    private readonly List<IGameEntity> _entitiesToAdd = new List<IGameEntity>();
-    private readonly List<IGameEntity> _entitiesToRemove = new List<IGameEntity>();
-
     public EntityManager() {}
         
     public bool AddEntity(IGameEntity entity)
@@ -42,7 +38,7 @@ public class EntityManager
         _entities.Remove(entity);
         return true;
     }
-    public bool HasEntity(IGameEntity entity) => _entities.Contains(entity) || _entitiesToAdd.Contains(entity) || _entitiesToRemove.Contains(entity);
+    public bool HasEntity(IGameEntity entity) => _entities.Contains(entity);
 
     public void Update(GameTime gameTime)
     {
@@ -51,6 +47,7 @@ public class EntityManager
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
+
         foreach(IGameEntity entity in _entities.OrderBy(e => e.DrawOrder))
             entity.Draw(spriteBatch, gameTime);
     }
