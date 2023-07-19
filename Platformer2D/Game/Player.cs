@@ -8,18 +8,20 @@ namespace Platformer2D;
 
 public class Player : IGameEntity
 {
+    public string Type { get; }
+    public bool[] Collision { get; set;}
     public int DrawOrder { get; set; }
     public int UpdateOrder { get; set; }
 
-    public Texture2D texture;
-    public Vector2 pos;
-    public float walk_speed;
+    public Texture2D Texture { get; }
+    //public Vector2 Pos { get; set; }
+    public float Pos_X { get; set; }
+    public float Pos_Y { get; set; }
+    public float walk_speed { get; set; }
     public float jump_speed;
     public float gravity_accel;
     public float max_jump;
-    public bool jumped;
-    public bool collision_g;
-    public bool collision_w;
+    //public bool jumped;
     float _world_gravity;
 
     //GraphicsDeviceManager _graphics;
@@ -27,8 +29,12 @@ public class Player : IGameEntity
     public Player(int x, int y, ref ContentManager Content)
     {
         // tmp = new(texture.Width / 2, texture.Heighti); //to make sure pos shows the down middle point of the texture
-        texture = Content.Load<Texture2D>("player");
-        pos = new Vector2(x, y) * Tile.Size;
+        Texture = Content.Load<Texture2D>("player");
+        Type = "player";
+        Collision = new bool[4];
+        //Pos = new Vector2(x, y) * Tile.Size;
+        Pos_X = x * Tile.Size.X;
+        Pos_Y = y * Tile.Size.Y;
         walk_speed = 500f;
         jump_speed = 0f;
         max_jump = 700f;
@@ -41,10 +47,9 @@ public class Player : IGameEntity
         var kstate = Keyboard.GetState();
 
 
-        if (kstate.IsKeyDown(Keys.Up) && player.collision_g == true)
+        if (kstate.IsKeyDown(Keys.Up) && player.Collision[0] == true && !player.Collision[3])
         {
-            player.jumped = true;
-            player.collision_g = false;
+            player.Collision[0] = false;
             player.jump_speed = player.max_jump;
 
 
@@ -54,9 +59,9 @@ public class Player : IGameEntity
         //     player1.jumped = false;
         // }
 
-        // if (kstate.IsKeyDown(Keys.Down)) {
-        //     player1.pos.Y += player1.walk_speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-        // }
+        if (kstate.IsKeyDown(Keys.Down)) {
+            Pos_Y += 10f; 
+        }
         if (kstate.IsKeyDown(Keys.Left))
         {
             player.walk_speed -= (Math.Abs(0.2f * player.walk_speed) + 15);
@@ -79,8 +84,8 @@ public class Player : IGameEntity
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
         spriteBatch.Draw(
-        this.texture,
-        this.pos,
+        this.Texture,
+        new Vector2(Pos_X, Pos_Y),
         null,
         Color.White,
         0f,
@@ -95,22 +100,23 @@ public class Player : IGameEntity
     {
         this.HandleInput(this);
 
-        this.collision_g = false;
 
+        float Elapsed_time = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        
         //Dead collision detection, TODO make sure it doesn't use _graphics after completing the Level class
         // if(this.pos.X > _graphics.PreferredBackBufferWidth - this.texture.Width / 2) {
         //     this.pos.X = _graphics.PreferredBackBufferWidth - this.texture.Width / 2;
-        //     this.collision_w = true;
+        //     this. = true;
         //     this.walk_speed = 0;
         // }
         // else if(this.pos.X < this.texture.Width / 2) {
         //     this.pos.X = this.texture.Width / 2;
-        //     this.collision_w = true;
+        //     this. = true;
         //     this.walk_speed = 0;
         // }
         // if(this.pos.Y > _graphics.PreferredBackBufferHeight - this.texture.Height / 2) {
         //     this.pos.Y = _graphics.PreferredBackBufferHeight - this.texture.Height / 2;
-        //     this.collision_g = true;
+        //     this.Collision[0] = true;
         // }
         // else if(this.pos.Y < this.texture.Height / 2) {
         //     this.pos.Y = this.texture.Height / 2;
@@ -120,22 +126,23 @@ public class Player : IGameEntity
             this.walk_speed = 500f;
         if (this.walk_speed < -500f)
             this.walk_speed = -500f;
+        if (Collision[1] || Collision[2])
+            walk_speed = 0;
 
-        this.pos.X += this.walk_speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+        this.Pos_X += this.walk_speed * Elapsed_time;
 
-        if (!this.collision_g)
+        if (!this.Collision[0])
         {
             this.gravity_accel += (0.05f * this.gravity_accel) + _world_gravity;
             if (this.gravity_accel > this.max_jump * 2)
                 this.gravity_accel = this.max_jump * 2;
         }
-        else
+        if (this.Collision[0])
         {
             this.gravity_accel = 0;
             this.jump_speed = 0;
-            this.jumped = false;
         }
-
-        this.pos.Y -= (this.jump_speed - this.gravity_accel) * (float)gameTime.ElapsedGameTime.TotalSeconds;
+        
+        this.Pos_Y -= (this.jump_speed - this.gravity_accel) * Elapsed_time;
     }
 }

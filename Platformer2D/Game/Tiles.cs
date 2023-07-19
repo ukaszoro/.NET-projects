@@ -8,20 +8,54 @@ using System.IO;
 
 namespace Platformer2D;
 
-enum TileCollision
+public static class RectangleExtensions
+{
+
+    // A cool function that returns the Vector of how deep are two rectangles intersecting with eachother
+    // Used in collision checking
+    
+    public static Vector2 GetIntersectionDepth(this Rectangle rectA, Rectangle rectB)     {
+        // Calculate half sizes.
+        float halfWidthA = rectA.Width / 2.0f;
+        float halfHeightA = rectA.Height / 2.0f;
+        float halfWidthB = rectB.Width / 2.0f;
+        float halfHeightB = rectB.Height / 2.0f;
+
+        // Calculate centers.
+        Vector2 centerA = new Vector2(rectA.Left + halfWidthA, rectA.Top + halfHeightA);
+        Vector2 centerB = new Vector2(rectB.Left + halfWidthB, rectB.Top + halfHeightB);
+
+        // Calculate current and minimum-non-intersecting distances between centers.
+        float distanceX = centerA.X - centerB.X;
+        float distanceY = centerA.Y - centerB.Y;
+        float minDistanceX = halfWidthA + halfWidthB;
+        float minDistanceY = halfHeightA + halfHeightB;
+
+        // If we are not intersecting at all, return (0, 0).
+        if (Math.Abs(distanceX) >= minDistanceX || Math.Abs(distanceY) >= minDistanceY)
+            return Vector2.Zero;
+
+        // Calculate and return intersection depths.
+        float depthX = distanceX > 0 ? minDistanceX - distanceX : -minDistanceX - distanceX;
+        float depthY = distanceY > 0 ? minDistanceY - distanceY : -minDistanceY - distanceY;
+        return new Vector2(depthX, depthY);
+    }
+}
+
+public enum TileCollision
 {
     Passable = 0,
     Impassable = 1,
     Platform = 2,
 }
-class Tile
+public class Tile
 {
     public Texture2D _texture;
     public TileCollision _collision;
 
     public const int Width = 40;
     public const int Height = 40;
-    
+
     public static readonly Vector2 Size = new Vector2(Width, Height);
 
     public Tile(Texture2D texture, TileCollision collision)
@@ -31,7 +65,7 @@ class Tile
     }
     public void Draw(SpriteBatch spriteBatch, int x, int y)
     {
-        Vector2 tmp_pos = new(x,y);
+        Vector2 tmp_pos = new(x, y);
         spriteBatch.Draw(
         _texture,
         tmp_pos * Size,
@@ -56,6 +90,7 @@ class Level
     private Point exit;
     ContentManager Content;
     EntityManager e_manager = new EntityManager();
+    CollisionManager c_manager;
 
     public Player player { get; set; }
     public int Score { get; }
@@ -132,7 +167,9 @@ class Level
     public void Update(GameTime gameTime)
     {
         e_manager.Update(gameTime);
-                
+        c_manager = new(e_manager, tiles);
+        c_manager.check_collision();
+
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
@@ -141,8 +178,8 @@ class Level
         for (int i = 0; i < Width; i++)
             for (int j = 0; j < Height; j++)
             {
-                if (!(tiles[i,j] == null))
-                    tiles[i,j].Draw(spriteBatch, i, j);
+                if (!(tiles[i, j] == null))
+                    tiles[i, j].Draw(spriteBatch, i, j);
             }
     }
 }
