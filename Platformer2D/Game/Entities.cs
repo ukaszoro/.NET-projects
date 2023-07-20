@@ -9,7 +9,7 @@ namespace Platformer2D;
 public interface IGameEntity
 {
     string Type { get; }
-    bool[] Collision { get; } 
+    bool[] Collision { get; }
     int DrawOrder { get; }
     int UpdateOrder { get; }
     //Vector2 Pos { get; set; }
@@ -83,7 +83,7 @@ public class CollisionManager
                 {
                     if (Tiles[x, y] == null)
                         continue;
-                        
+
                     Rectangle Tile = new(x * 40, y * 40, 40, 40);
                     Vector2 depth = RectangleExtensions.GetIntersectionDepth(entity1_rect, Tile);
                     if (Tiles[x, y]._collision == TileCollision.Impassable)
@@ -93,22 +93,35 @@ public class CollisionManager
                         Vector2 absDepth = new(Math.Abs(depth.X), Math.Abs(depth.Y));
                         if (absDepth.Y < absDepth.X && !entity1.Collision[0])
                         {
-                            entity1.Collision[0] = true;
-                            entity1.Pos_Y += depth.Y;
                             if (entity1_rect.Top > Tile.Top)
+                            {
                                 entity1.Collision[3] = true;
+                                entity1.Pos_Y = Tile.Bottom;
+                            }
+                            else if (depth.Y < 0)
+                            {
+                                entity1.Collision[0] = true;
+                                entity1.Pos_Y = Tile.Top - entity1.Texture.Height + 1;
+                            }
                         }
-                        
+
                         else if (absDepth.Y > absDepth.X && !(entity1.Collision[1] || entity1.Collision[2]))
                         {
-                            entity1.Pos_X += depth.X;
-                            entity1.walk_speed = 0;
+                            // entity1.Pos_X += depth.X;
+                            if (entity1.Type == "player")
+                                entity1.walk_speed = 0;
+                                
                             if (depth.X < 0) // Right wall collision
+                            {
                                 entity1.Collision[1] = true;
+                                entity1.Pos_X = Tile.Left - entity1.Texture.Width+ 0.2f; // weird value, but without it player vibrates when walking into a wall?
+                            }
                             if (depth.X > 0) // Left wall collision
+                            {
                                 entity1.Collision[2] = true;
+                                entity1.Pos_X = Tile.Right;
+                            }
                         }
-                        // if ((entity1_rect.Bottom > Tile.Bottom && entity1_rect.Bottom < Tile.Top) && )
                     }
                 }
             }

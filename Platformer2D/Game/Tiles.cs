@@ -173,7 +173,6 @@ class Level
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
-
         e_manager.Draw(spriteBatch, gameTime);
         for (int i = 0; i < Width; i++)
             for (int j = 0; j < Height; j++)

@@ -12,7 +12,7 @@ public class Game1 : Game
     EntityManager e_manager;
     static float world_gravity = 10f;
     Level level;
-
+    
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
@@ -28,7 +28,8 @@ public class Game1 : Game
         // TODO: Add your initialization logic here
         level = new(File.Open("./Maps/Map0", FileMode.Open), 0, Content);
         // player.UpdateOrder = 1;
-
+        
+        
         base.Initialize();
     }
 

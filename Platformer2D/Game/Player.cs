@@ -18,6 +18,7 @@ public class Player : IGameEntity
     public float Pos_X { get; set; }
     public float Pos_Y { get; set; }
     public float walk_speed { get; set; }
+    float max_walk_speed;
     public float jump_speed;
     public float gravity_accel;
     public float max_jump;
@@ -35,7 +36,6 @@ public class Player : IGameEntity
         //Pos = new Vector2(x, y) * Tile.Size;
         Pos_X = x * Tile.Size.X;
         Pos_Y = y * Tile.Size.Y;
-        walk_speed = 500f;
         jump_speed = 0f;
         max_jump = 700f;
         gravity_accel = 0f;
@@ -79,10 +79,19 @@ public class Player : IGameEntity
             if (player.walk_speed > -10 && player.walk_speed < 10)
                 player.walk_speed = 0;
         }
+        if (kstate.IsKeyDown(Keys.Z))
+        {
+            player.max_walk_speed = 600;
+        }
+        else
+        {
+            player.max_walk_speed = 300;
+        }
     }
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
+        
         spriteBatch.Draw(
         this.Texture,
         new Vector2(Pos_X, Pos_Y),
@@ -122,10 +131,11 @@ public class Player : IGameEntity
         //     this.pos.Y = this.texture.Height / 2;
         // }
 
-        if (this.walk_speed > 500f)
-            this.walk_speed = 500f;
-        if (this.walk_speed < -500f)
-            this.walk_speed = -500f;
+        if (this.walk_speed > max_walk_speed)
+            this.walk_speed -= 0.5f * Math.Abs(this.max_walk_speed - this.walk_speed);
+        if (this.walk_speed < -max_walk_speed)
+            this.walk_speed += 0.5f * Math.Abs(this.max_walk_speed + this.walk_speed);
+            
         if (Collision[1] || Collision[2])
             walk_speed = 0;
 
@@ -137,7 +147,7 @@ public class Player : IGameEntity
             if (this.gravity_accel > this.max_jump * 2)
                 this.gravity_accel = this.max_jump * 2;
         }
-        if (this.Collision[0])
+        if (this.Collision[0] || this.Collision[3])
         {
             this.gravity_accel = 0;
             this.jump_speed = 0;
