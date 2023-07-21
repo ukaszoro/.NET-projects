@@ -62,17 +62,15 @@ public class EntityManager
 public class CollisionManager
 {
     private readonly List<IGameEntity> _entities = new List<IGameEntity>();
-    Tile[,] Tiles;
-    public CollisionManager(EntityManager e_manager, Tile[,] tiles)
+    public CollisionManager(EntityManager e_manager)
     {
         _entities = e_manager._entities;
-        Tiles = tiles;
     }
-    public void check_collision()
+    public void check_collision(ref Tile[,] Tiles)
     {
         foreach (IGameEntity entity1 in _entities.OrderBy(e => e.UpdateOrder))
         {
-            Rectangle entity1_rect = new((int)entity1.Pos_X, (int)entity1.Pos_Y, entity1.Texture.Width, entity1.Texture.Height);
+            Rectangle entity1_rect = new((int)entity1.Pos_X, (int)entity1.Pos_Y, (int)Tile.Size.X, (int)Tile.Size.Y);
             entity1.Collision[0] = false; // Collision[0] - collision with the ground
             entity1.Collision[1] = false;
             entity1.Collision[2] = false;
@@ -91,7 +89,7 @@ public class CollisionManager
                         if (depth == Vector2.Zero)
                             continue;
                         Vector2 absDepth = new(Math.Abs(depth.X), Math.Abs(depth.Y));
-                        if (absDepth.Y < absDepth.X && !entity1.Collision[0])
+                        if (absDepth.Y < absDepth.X)
                         {
                             if (entity1_rect.Top > Tile.Top)
                             {
@@ -101,11 +99,11 @@ public class CollisionManager
                             else if (depth.Y < 0)
                             {
                                 entity1.Collision[0] = true;
-                                entity1.Pos_Y = Tile.Top - entity1.Texture.Height + 1;
+                                entity1.Pos_Y = Tile.Top - Tile.Size.Y + 1;
                             }
                         }
 
-                        else if (absDepth.Y > absDepth.X && !(entity1.Collision[1] || entity1.Collision[2]))
+                        else if (absDepth.Y > absDepth.X)
                         {
                             // entity1.Pos_X += depth.X;
                             if (entity1.Type == "player")
@@ -114,7 +112,7 @@ public class CollisionManager
                             if (depth.X < 0) // Right wall collision
                             {
                                 entity1.Collision[1] = true;
-                                entity1.Pos_X = Tile.Left - entity1.Texture.Width+ 0.2f; // weird value, but without it player vibrates when walking into a wall?
+                                entity1.Pos_X = Tile.Left - Tile.Size.Y + 0.2f; // weird value, but without it player vibrates when walking into a wall?
                             }
                             if (depth.X > 0) // Left wall collision
                             {

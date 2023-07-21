@@ -46,7 +46,9 @@ public enum TileCollision
 {
     Passable = 0,
     Impassable = 1,
-    Platform = 2,
+    Breakable = 2,
+    Mysteryblock_coin = 3,
+    Mysteryblock_powerup = 4,
 }
 public class Tile
 {
@@ -140,6 +142,18 @@ class Level
                 return null;
             case '#':
                 return LoadBlock("block", TileCollision.Impassable);
+            case '=':
+                return LoadBlock("brick", TileCollision.Impassable);
+            case '?':
+                return LoadBlock("mystery_block", TileCollision.Impassable);
+            case '&':
+                return LoadBlock("stair", TileCollision.Impassable);
+            case 'I':
+                return LoadBlock("pipe_part",TileCollision.Impassable);
+            case '^':
+                return LoadBlock("pipe_end",TileCollision.Impassable);
+            case '.':
+                return LoadBlock("invisible",TileCollision.Impassable);
             case '1':
                 return LoadStartTile(x, y);
 
@@ -168,8 +182,8 @@ class Level
     public void Update(GameTime gameTime)
     {
         e_manager.Update(gameTime);
-        c_manager = new(e_manager, tiles);
-        c_manager.check_collision();
+        c_manager = new(e_manager);
+        c_manager.check_collision(ref tiles);
 
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)

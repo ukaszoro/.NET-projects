@@ -5,7 +5,13 @@ using Microsoft.Xna.Framework.Content;
 using System;
 
 namespace Platformer2D;
-
+public enum State
+{
+    Idle = 0,
+    Running = 1,
+    InAir = 2,
+    Breaking = 3,
+}
 public class Player : IGameEntity
 {
     public string Type { get; }
@@ -22,9 +28,16 @@ public class Player : IGameEntity
     public float jump_speed;
     public float gravity_accel;
     public float max_jump;
+    bool walk_input;
     //public bool jumped;
     float _world_gravity;
-
+    
+    State Player_state;
+    Rectangle[] SourceRect;
+    float Anim_timer;
+    float Anim_threshold;
+    int Anim_current;
+    float rotation;
     //GraphicsDeviceManager _graphics;
 
     public Player(int x, int y, ref ContentManager Content)
@@ -40,6 +53,15 @@ public class Player : IGameEntity
         max_jump = 700f;
         gravity_accel = 0f;
         _world_gravity = 10f;
+
+        SourceRect = new Rectangle[6];
+        SourceRect[0] = new(0,0,40,40);
+        SourceRect[1] = new(40,0,40,40);
+        SourceRect[2] = new(80,0,40,40);
+        SourceRect[3] = new(120,0,40,40);
+        SourceRect[4] = new(160,0,40,40);
+        SourceRect[5] = new(200,0,40,40);
+        Anim_threshold = 50;
     }
 
     public void HandleInput(Player player)
@@ -52,23 +74,27 @@ public class Player : IGameEntity
             player.Collision[0] = false;
             player.jump_speed = player.max_jump;
 
-
         }
         // if (kstate.IsKeyUp(Keys.Up) && player1.jump_speed < 0.4f * player1.max_jump && player1.jumped) {
         //     player1.jump_speed = 0.1f * player1.max_jump;
         //     player1.jumped = false;
         // }
-
-        if (kstate.IsKeyDown(Keys.Down)) {
-            Pos_Y += 10f; 
-        }
+        // if (kstate.IsKeyDown(Keys.Down)) {
+        //     Pos_Y += 10f; 
+        // }
         if (kstate.IsKeyDown(Keys.Left))
         {
             player.walk_speed -= (Math.Abs(0.2f * player.walk_speed) + 15);
+            walk_input = true;
         }
         if (kstate.IsKeyDown(Keys.Right))
         {
             player.walk_speed += Math.Abs(0.2f * player.walk_speed) + 15;
+            walk_input = true;
+        }
+        if (walk_input == true && kstate.IsKeyUp(Keys.Left) && kstate.IsKeyUp(Keys.Right))
+        {
+            walk_input = false;
         }
         if (!kstate.IsKeyDown(Keys.Right) && !kstate.IsKeyDown(Keys.Left))
         {
@@ -91,52 +117,85 @@ public class Player : IGameEntity
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D)
     {
-        if (Pos_X > 400)
+        if (Pos_X > 10 * 40 && Pos_X < 216 * 40)
             Camera2D.X = Pos_X - 400;
         if (Pos_Y > 440)
             Camera2D.Y = 600;
+        Check_state();
+        if (Player_state == State.Idle)
+            Anim_current = 0;
+        if (Player_state == State.Running)
+        {
+            if (Anim_timer >= Anim_threshold)
+            {
+                Anim_current = 1 + ((Anim_current + 1) % 3);
+                Anim_timer = 0;
+            }
+            else
+                Anim_timer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+            if (walk_speed < 0)
+            {
+                rotation = 0;
+            }
+            else
+                rotation = 1;
+        }
+        if (Player_state == State.InAir)
+            Anim_current = 4;
+
         spriteBatch.Draw(
         this.Texture,
-        new Vector2(Pos_X, Pos_Y),
-        null,
+        new Vector2(Pos_X, Pos_Y), 
+        SourceRect[Anim_current],
         Color.White,
         0f,
         Camera2D,
-        Vector2.One,
-        SpriteEffects.None,
+        new Vector2(1, 1),
+        (rotation == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally),
         0f
         );
 
     }
     public void Update(GameTime gameTime)
     {
-        this.HandleInput(this);
+        HandleInput(this);
 
 
         float Elapsed_time = (float)gameTime.ElapsedGameTime.TotalSeconds;
         
-        if (this.walk_speed > max_walk_speed)
-            this.walk_speed -= 0.5f * Math.Abs(this.max_walk_speed - this.walk_speed);
-        if (this.walk_speed < -max_walk_speed)
-            this.walk_speed += 0.5f * Math.Abs(this.max_walk_speed + this.walk_speed);
-            
+        if (walk_speed > max_walk_speed)
+            walk_speed -= 0.5f * Math.Abs(max_walk_speed - walk_speed);
+        if (walk_speed < -max_walk_speed)
+            walk_speed += 0.5f * Math.Abs(max_walk_speed + walk_speed);
+                    
         if (Collision[1] || Collision[2])
             walk_speed = 0;
-
-        this.Pos_X += this.walk_speed * Elapsed_time;
-
-        if (!this.Collision[0])
+        
+        Pos_X += walk_speed * Elapsed_time;
+        
+        if (!Collision[0])
         {
-            this.gravity_accel += (0.05f * this.gravity_accel) + _world_gravity;
-            if (this.gravity_accel > this.max_jump * 2)
-                this.gravity_accel = this.max_jump * 2;
+            gravity_accel += (0.05f * gravity_accel) + _world_gravity;
+            if (gravity_accel > max_jump * 2)
+                gravity_accel = max_jump * 2;
         }
-        if (this.Collision[0] || this.Collision[3])
+        if (Collision[0] || Collision[3])
         {
-            this.gravity_accel = 0;
-            this.jump_speed = 0;
+            gravity_accel = 0;
+            jump_speed = 0;
         }
         
-        this.Pos_Y -= (this.jump_speed - this.gravity_accel) * Elapsed_time;
+        Pos_Y -= (jump_speed - gravity_accel) * Elapsed_time;
+    }
+    void Check_state()
+    {
+        if (!Collision[0])
+            Player_state = State.InAir;
+        else if (walk_speed != 0 && !walk_input)
+            Player_state = State.Breaking;
+        else if (walk_speed != 0)
+            Player_state = State.Running;
+        else
+            Player_state = State.Idle;
     }
 }
