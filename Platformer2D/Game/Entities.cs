@@ -18,7 +18,7 @@ public interface IGameEntity
     float walk_speed { get; set; }
     Texture2D Texture { get; }
     void Update(GameTime gameTime);
-    void Draw(SpriteBatch spriteBatch, GameTime gameTime);
+    void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D);
 }
 
 public class EntityManager
@@ -52,11 +52,11 @@ public class EntityManager
         foreach (IGameEntity entity in _entities.OrderBy(e => e.UpdateOrder))
             entity.Update(gameTime);
     }
-    public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+    public void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D)
     {
 
         foreach (IGameEntity entity in _entities.OrderBy(e => e.DrawOrder))
-            entity.Draw(spriteBatch, gameTime);
+            entity.Draw(spriteBatch, gameTime, ref Camera2D);
     }
 }
 public class CollisionManager

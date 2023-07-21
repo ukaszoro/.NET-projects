@@ -63,7 +63,7 @@ public class Tile
         _texture = texture;
         _collision = collision;
     }
-    public void Draw(SpriteBatch spriteBatch, int x, int y)
+    public void Draw(SpriteBatch spriteBatch, int x, int y, Vector2 Camera2D)
     {
         Vector2 tmp_pos = new(x, y);
         spriteBatch.Draw(
@@ -72,7 +72,7 @@ public class Tile
         null,
         Color.White,
         0f,
-        Vector2.One,
+        Camera2D,
         Vector2.One,
         SpriteEffects.None,
         0f
@@ -91,6 +91,7 @@ class Level
     ContentManager Content;
     EntityManager e_manager = new EntityManager();
     CollisionManager c_manager;
+    Vector2 Camera2D;
 
     public Player player { get; set; }
     public int Score { get; }
@@ -173,12 +174,12 @@ class Level
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
-        e_manager.Draw(spriteBatch, gameTime);
+        e_manager.Draw(spriteBatch, gameTime, ref Camera2D);
         for (int i = 0; i < Width; i++)
             for (int j = 0; j < Height; j++)
             {
                 if (!(tiles[i, j] == null))
-                    tiles[i, j].Draw(spriteBatch, i, j);
+                    tiles[i, j].Draw(spriteBatch, i, j, Camera2D);
             }
     }
 }

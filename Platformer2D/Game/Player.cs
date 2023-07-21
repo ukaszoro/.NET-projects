@@ -89,16 +89,19 @@ public class Player : IGameEntity
         }
     }
 
-    public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+    public void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D)
     {
-        
+        if (Pos_X > 400)
+            Camera2D.X = Pos_X - 400;
+        if (Pos_Y > 440)
+            Camera2D.Y = 600;
         spriteBatch.Draw(
         this.Texture,
         new Vector2(Pos_X, Pos_Y),
         null,
         Color.White,
         0f,
-        Vector2.One,
+        Camera2D,
         Vector2.One,
         SpriteEffects.None,
         0f
@@ -112,25 +115,6 @@ public class Player : IGameEntity
 
         float Elapsed_time = (float)gameTime.ElapsedGameTime.TotalSeconds;
         
-        //Dead collision detection, TODO make sure it doesn't use _graphics after completing the Level class
-        // if(this.pos.X > _graphics.PreferredBackBufferWidth - this.texture.Width / 2) {
-        //     this.pos.X = _graphics.PreferredBackBufferWidth - this.texture.Width / 2;
-        //     this. = true;
-        //     this.walk_speed = 0;
-        // }
-        // else if(this.pos.X < this.texture.Width / 2) {
-        //     this.pos.X = this.texture.Width / 2;
-        //     this. = true;
-        //     this.walk_speed = 0;
-        // }
-        // if(this.pos.Y > _graphics.PreferredBackBufferHeight - this.texture.Height / 2) {
-        //     this.pos.Y = _graphics.PreferredBackBufferHeight - this.texture.Height / 2;
-        //     this.Collision[0] = true;
-        // }
-        // else if(this.pos.Y < this.texture.Height / 2) {
-        //     this.pos.Y = this.texture.Height / 2;
-        // }
-
         if (this.walk_speed > max_walk_speed)
             this.walk_speed -= 0.5f * Math.Abs(this.max_walk_speed - this.walk_speed);
         if (this.walk_speed < -max_walk_speed)
