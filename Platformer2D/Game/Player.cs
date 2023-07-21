@@ -73,7 +73,6 @@ public class Player : IGameEntity
         {
             player.Collision[0] = false;
             player.jump_speed = player.max_jump;
-
         }
         // if (kstate.IsKeyUp(Keys.Up) && player1.jump_speed < 0.4f * player1.max_jump && player1.jumped) {
         //     player1.jump_speed = 0.1f * player1.max_jump;
@@ -107,7 +106,7 @@ public class Player : IGameEntity
         }
         if (kstate.IsKeyDown(Keys.Z))
         {
-            player.max_walk_speed = 600;
+            player.max_walk_speed = 500;
         }
         else
         {
@@ -142,6 +141,8 @@ public class Player : IGameEntity
         }
         if (Player_state == State.InAir)
             Anim_current = 4;
+        if (Player_state == State.Breaking)
+            Anim_current = 5;
 
         spriteBatch.Draw(
         this.Texture,
