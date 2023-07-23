@@ -11,7 +11,7 @@ public class Game1 : Game
     EntityManager e_manager;
     static float world_gravity = 10f;
     Level level;
-    
+
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
@@ -21,6 +21,9 @@ public class Game1 : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         Window.AllowUserResizing = true;
+        _graphics.PreferredBackBufferWidth = 800;
+        _graphics.PreferredBackBufferHeight = 600;
+        _graphics.ApplyChanges();
     }
 
     protected override void Initialize()
@@ -28,8 +31,8 @@ public class Game1 : Game
         // TODO: Add your initialization logic here
         level = new(File.Open("./Maps/Map0", FileMode.Open), 0, Content);
         // player.UpdateOrder = 1;
-        
-        
+
+
         base.Initialize();
     }
 
@@ -38,7 +41,7 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // TODO: use this.Content to load your game content here
-        
+
     }
 
     protected override void Update(GameTime gameTime)
@@ -53,7 +56,7 @@ public class Game1 : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+        GraphicsDevice.Clear(new Color(92, 148, 252));
         _spriteBatch.Begin();
         // TODO: Add your drawing code here
         level.Draw(_spriteBatch, gameTime);

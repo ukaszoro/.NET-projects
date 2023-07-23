@@ -17,6 +17,8 @@ public interface IGameEntity
     float Pos_Y { get; set; }
     float walk_speed { get; set; }
     Texture2D Texture { get; }
+    int Height { get; set; }
+    int Width { get; set; }
     void Update(GameTime gameTime);
     void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D);
 }
@@ -70,7 +72,7 @@ public class CollisionManager
     {
         foreach (IGameEntity entity1 in _entities.OrderBy(e => e.UpdateOrder))
         {
-            Rectangle entity1_rect = new((int)entity1.Pos_X, (int)entity1.Pos_Y, (int)Tile.Size.X, (int)Tile.Size.Y);
+            Rectangle entity1_rect = new((int)entity1.Pos_X, (int)entity1.Pos_Y, (int)entity1.Width, (int)entity1.Height);
             entity1.Collision[0] = false; // Collision[0] - collision with the ground
             entity1.Collision[1] = false;
             entity1.Collision[2] = false;
@@ -99,20 +101,18 @@ public class CollisionManager
                             else if (depth.Y < 0)
                             {
                                 entity1.Collision[0] = true;
-                                entity1.Pos_Y = Tile.Top - Tile.Size.Y + 1;
+                                entity1.Pos_Y = Tile.Top - entity1.Height + 1;
                             }
                         }
 
                         else if (absDepth.Y > absDepth.X)
                         {
                             // entity1.Pos_X += depth.X;
-                            if (entity1.Type == "player")
-                                entity1.walk_speed = 0;
-                                
+
                             if (depth.X < 0) // Right wall collision
                             {
                                 entity1.Collision[1] = true;
-                                entity1.Pos_X = Tile.Left - Tile.Size.Y + 0.2f; // weird value, but without it player vibrates when walking into a wall?
+                                entity1.Pos_X = Tile.Left - entity1.Width + 0.2f; // weird value, but without it player vibrates when walking into a wall?
                             }
                             if (depth.X > 0) // Left wall collision
                             {

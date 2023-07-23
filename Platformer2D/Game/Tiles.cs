@@ -1,46 +1,11 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
 namespace Platformer2D;
-
-public static class RectangleExtensions
-{
-
-    // A cool function that returns the Vector of how deep are two rectangles intersecting with eachother
-    // Used in collision checking
-    
-    public static Vector2 GetIntersectionDepth(this Rectangle rectA, Rectangle rectB)     {
-        // Calculate half sizes.
-        float halfWidthA = rectA.Width / 2.0f;
-        float halfHeightA = rectA.Height / 2.0f;
-        float halfWidthB = rectB.Width / 2.0f;
-        float halfHeightB = rectB.Height / 2.0f;
-
-        // Calculate centers.
-        Vector2 centerA = new Vector2(rectA.Left + halfWidthA, rectA.Top + halfHeightA);
-        Vector2 centerB = new Vector2(rectB.Left + halfWidthB, rectB.Top + halfHeightB);
-
-        // Calculate current and minimum-non-intersecting distances between centers.
-        float distanceX = centerA.X - centerB.X;
-        float distanceY = centerA.Y - centerB.Y;
-        float minDistanceX = halfWidthA + halfWidthB;
-        float minDistanceY = halfHeightA + halfHeightB;
-
-        // If we are not intersecting at all, return (0, 0).
-        if (Math.Abs(distanceX) >= minDistanceX || Math.Abs(distanceY) >= minDistanceY)
-            return Vector2.Zero;
-
-        // Calculate and return intersection depths.
-        float depthX = distanceX > 0 ? minDistanceX - distanceX : -minDistanceX - distanceX;
-        float depthY = distanceY > 0 ? minDistanceY - distanceY : -minDistanceY - distanceY;
-        return new Vector2(depthX, depthY);
-    }
-}
 
 public enum TileCollision
 {
@@ -99,11 +64,12 @@ class Level
     public int Score { get; }
     public bool reachedExit { get; }
     public TimeSpan TimeRemaining { get; }
+    public int Lives;
     public Level(Stream fileStream, int LevelIndex, ContentManager content)
     {
         Content = content;
         TimeRemaining = TimeSpan.FromMinutes(2.0);
-
+        Lives = 3;
         LoadMapFile(fileStream);
     }
     private void LoadMapFile(Stream fileStream)
@@ -149,14 +115,15 @@ class Level
             case '&':
                 return LoadBlock("stair", TileCollision.Impassable);
             case 'I':
-                return LoadBlock("pipe_part",TileCollision.Impassable);
+                return LoadBlock("pipe_part", TileCollision.Impassable);
             case '^':
-                return LoadBlock("pipe_end",TileCollision.Impassable);
+                return LoadBlock("pipe_end", TileCollision.Impassable);
             case '.':
-                return LoadBlock("invisible",TileCollision.Impassable);
+                return LoadBlock("invisible", TileCollision.Impassable);
             case '1':
                 return LoadStartTile(x, y);
-
+            case '@':
+                return LoadBlock("scenary", TileCollision.Impassable);
             default:
                 throw new NotSupportedException(String.Format("Unsupported tile type character '{0}' at {1}, {2}", tileType, x, y));
         }
@@ -171,7 +138,7 @@ class Level
         if (player != null)
             throw new NotSupportedException("A lavel may only have one starting point.");
 
-        player = new Player(x, y, ref Content);
+        player = new Player(x, y, ref Content, ref Lives);
         e_manager.AddEntity(player);
 
         return null;
@@ -188,13 +155,13 @@ class Level
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
-        e_manager.Draw(spriteBatch, gameTime, ref Camera2D);
         for (int i = 0; i < Width; i++)
             for (int j = 0; j < Height; j++)
             {
                 if (!(tiles[i, j] == null))
                     tiles[i, j].Draw(spriteBatch, i, j, Camera2D);
             }
+        e_manager.Draw(spriteBatch, gameTime, ref Camera2D);
     }
 }
 
