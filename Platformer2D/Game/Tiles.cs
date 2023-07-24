@@ -12,8 +12,7 @@ public enum TileCollision
     Passable = 0,
     Impassable = 1,
     Breakable = 2,
-    Mysteryblock_coin = 3,
-    Mysteryblock_powerup = 4,
+    Mysteryblock = 3,
 }
 public class Tile
 {
@@ -24,26 +23,91 @@ public class Tile
     public const int Height = 40;
 
     public static readonly Vector2 Size = new Vector2(Width, Height);
+    public bool Hit { get; set; }
+    public bool Break { get; set; }
+    public Vector2 Hit_anim = new(0,0);
+    public float Anim_timer;
+    float Anim_X = 0;
 
     public Tile(Texture2D texture, TileCollision collision)
     {
         _texture = texture;
         _collision = collision;
     }
-    public void Draw(SpriteBatch spriteBatch, int x, int y, Vector2 Camera2D)
+    public void Draw(SpriteBatch spriteBatch, int x, int y, Vector2 Camera2D, GameTime gameTime)
     {
         Vector2 tmp_pos = new(x, y);
-        spriteBatch.Draw(
-        _texture,
-        tmp_pos * Size,
-        null,
-        Color.White,
-        0f,
-        Camera2D,
-        Vector2.One,
-        SpriteEffects.None,
-        0f
-        );
+        if (Break == true)
+        {
+            Rectangle[] Sourcerect = new Rectangle[4];
+            Sourcerect[0] = new(0,0,20,20);
+            Sourcerect[1] = new(20,0,20,20);
+            Sourcerect[2] = new(0,20,20,20);
+            Sourcerect[3] = new(20,20,20,20);
+            Hit = false;
+            _collision = TileCollision.Passable;
+            for (int i = 0; i < 4; i++)
+            {
+                if (i < 2)
+                    Hit_anim.X = -0.1f * 3 * (i + 1) * Anim_X;
+                else
+                    Hit_anim.X = 0.1f * 3 * (i - 1) * Anim_X;
+
+                if (Anim_timer >= 7)
+                {
+                    Hit_anim.Y = (0.01f * -Anim_X * Anim_X + 1.2f * Anim_X);
+                    Anim_X += 6;
+                    Anim_timer = 0;
+                }
+                else
+                    Anim_timer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                    
+                spriteBatch.Draw(
+                _texture,
+                tmp_pos * Size,
+                Sourcerect[i],
+                Color.White,
+                0f,
+                Camera2D + Hit_anim,
+                Vector2.One,
+                SpriteEffects.None,
+                0f
+                );
+
+            }
+
+        }
+        if (Hit == true)
+        {
+            if (Anim_timer >= 6)
+            {
+                Hit_anim.Y = (0.01f * -Anim_X * Anim_X + 1.2f * Anim_X);
+                Anim_X += 9;
+                Anim_timer = 0;
+            }
+            else
+                Anim_timer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+        }
+        if (Anim_X > 120 && Break == false)
+        {
+            Hit = false;
+            Hit_anim.Y = 0;
+            Anim_timer = 0;
+            Anim_X = 0;
+        }
+
+        if (Break != true)
+            spriteBatch.Draw(
+            _texture,
+            tmp_pos * Size,
+            null,
+            Color.White,
+            0f,
+            Camera2D + Hit_anim,
+            Vector2.One,
+            SpriteEffects.None,
+            0f
+            );
     }
 }
 class Level
@@ -109,9 +173,9 @@ class Level
             case '#':
                 return LoadBlock("block", TileCollision.Impassable);
             case '=':
-                return LoadBlock("brick", TileCollision.Impassable);
+                return LoadBlock("brick", TileCollision.Breakable);
             case '?':
-                return LoadBlock("mystery_block", TileCollision.Impassable);
+                return LoadBlock("mystery_block", TileCollision.Mysteryblock);
             case '&':
                 return LoadBlock("stair", TileCollision.Impassable);
             case 'I':
@@ -124,11 +188,20 @@ class Level
                 return LoadStartTile(x, y);
             case '@':
                 return LoadBlock("scenary", TileCollision.Impassable);
+            case 'G':
+                return LoadGoombaTile(x, y);
             default:
                 throw new NotSupportedException(String.Format("Unsupported tile type character '{0}' at {1}, {2}", tileType, x, y));
         }
 
     }
+    private Tile LoadGoombaTile(int x, int y)
+    {
+        Goomba goomba = new(x, y, ref Content);
+        e_manager.AddEntity(goomba);
+        return null;
+    }
+    
     private Tile LoadBlock(string name, TileCollision collision)
     {
         return new Tile(Content.Load<Texture2D>(name), collision);
@@ -148,10 +221,18 @@ class Level
     public int Width { get { return tiles.GetLength(0); } }
     public void Update(GameTime gameTime)
     {
+        for (int i = 0; i < Width; i++)
+            for (int j = 0; j < Height; j++)
+            {
+                if (tiles[i, j] != null)
+                    if (tiles[i, j].Break == true)
+                    {
+                        tiles[i, j]._texture = Content.Load<Texture2D>("brick_debre");
+                    }
+            }
         e_manager.Update(gameTime);
         c_manager = new(e_manager);
         c_manager.check_collision(ref tiles);
-
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
@@ -159,7 +240,7 @@ class Level
             for (int j = 0; j < Height; j++)
             {
                 if (!(tiles[i, j] == null))
-                    tiles[i, j].Draw(spriteBatch, i, j, Camera2D);
+                    tiles[i, j].Draw(spriteBatch, i, j, Camera2D, gameTime);
             }
         e_manager.Draw(spriteBatch, gameTime, ref Camera2D);
     }

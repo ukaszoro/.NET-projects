@@ -86,17 +86,24 @@ public class CollisionManager
 
                     Rectangle Tile = new(x * 40, y * 40, 40, 40);
                     Vector2 depth = RectangleExtensions.GetIntersectionDepth(entity1_rect, Tile);
-                    if (Tiles[x, y]._collision == TileCollision.Impassable)
+                    if (Tiles[x, y]._collision != TileCollision.Passable)
                     {
                         if (depth == Vector2.Zero)
                             continue;
                         Vector2 absDepth = new(Math.Abs(depth.X), Math.Abs(depth.Y));
                         if (absDepth.Y < absDepth.X)
                         {
-                            if (entity1_rect.Top > Tile.Top)
+                            if (depth.Y > 0)
                             {
                                 entity1.Collision[3] = true;
                                 entity1.Pos_Y = Tile.Bottom;
+                                if (Tiles[x,y]._collision == TileCollision.Breakable || Tiles[x,y]._collision == TileCollision.Mysteryblock)
+                                {
+                                    Tiles[x,y].Hit = true;
+                                    if (entity1.Height == 80)
+                                        if (Tiles[x,y]._collision == TileCollision.Breakable)
+                                            Tiles[x,y].Break = true;
+                                }
                             }
                             else if (depth.Y < 0)
                             {
@@ -113,13 +120,54 @@ public class CollisionManager
                             {
                                 entity1.Collision[1] = true;
                                 entity1.Pos_X = Tile.Left - entity1.Width + 0.2f; // weird value, but without it player vibrates when walking into a wall?
+                                if (entity1.Type == "goomba")
+                                    entity1.walk_speed = -entity1.walk_speed;
                             }
                             if (depth.X > 0) // Left wall collision
                             {
                                 entity1.Collision[2] = true;
                                 entity1.Pos_X = Tile.Right;
+                                if (entity1.Type == "goomba")
+                                    entity1.walk_speed = -entity1.walk_speed;
                             }
                         }
+                    }
+                }
+            }
+            foreach (IGameEntity entity2 in _entities.OrderBy(e => e.UpdateOrder))
+            {
+                if (entity1 == entity2)
+                    continue;
+
+                Rectangle entity2_rect = new((int)entity2.Pos_X, (int)entity2.Pos_Y, (int)entity2.Width, (int)entity2.Height);
+                Vector2 depth = RectangleExtensions.GetIntersectionDepth(entity1_rect, entity2_rect);
+                if (depth == Vector2.One)
+                    continue;
+                Vector2 absDepth = new(Math.Abs(depth.X), Math.Abs(depth.Y));
+
+                if (absDepth.Y < absDepth.X)
+                {
+                    if (depth.Y > 0) // Entity2 on top of Entity1
+                    {
+                        
+                    }
+                    else if (depth.Y < 0) // Entity1 on top of Entity2
+                    {
+
+                    }
+                }
+
+                else if (absDepth.Y > absDepth.X)
+                {
+                    // entity1.Pos_X += depth.X;
+
+                    if (depth.X < 0) // Entity1 on the left of Entity2
+                    {
+                    
+                    }
+                    if (depth.X > 0) // Entity1 on the right of Entity2
+                    {
+                    
                     }
                 }
             }
