@@ -29,8 +29,8 @@ public class Player : IGameEntity
     public float Pos_Y { get; set; }
     public float walk_speed { get; set; }
     float max_walk_speed;
-    public float jump_speed;
-    public float gravity_accel;
+    public float jump_speed { get; set; }
+    public float gravity_accel { get; set; }
     public float max_jump;
     bool walk_input;
     float _world_gravity;
@@ -50,6 +50,10 @@ public class Player : IGameEntity
 
     Health Player_health;
     public int Player_lifes { get; set; }
+    public bool Hurt { get; set; }
+    float Hurt_cooldown;
+    bool i_frames;
+    public bool remove { get; set; }
 
     public Player(int x, int y, ref ContentManager Content, ref int lives)
     {
@@ -63,7 +67,7 @@ public class Player : IGameEntity
         gravity_accel = 0f;
         _world_gravity = 10f;
 
-        SourceRect = new Rectangle[13];
+        SourceRect = new Rectangle[14];
         SourceRect[0] = new(0, 0, 40, 40); //small Idle
         SourceRect[1] = new(40, 0, 40, 40); //small Running1
         SourceRect[2] = new(80, 0, 40, 40); //small Running2
@@ -77,10 +81,12 @@ public class Player : IGameEntity
         SourceRect[10] = new(120, 40, 40, 80); //big Running3
         SourceRect[11] = new(160, 40, 40, 80); //big Jumping
         SourceRect[12] = new(200, 40, 40, 80);//big Breaking
+        SourceRect[13] = new(240,40,1,1); // Empty for i-frames
 
         Anim_threshold = 50;
         Ded_anim = new(0, 0);
         x = 0;
+        Hurt_cooldown = 0f;
 
         Player_health = Health.Small;
         Height = 40; Width = 40;
@@ -144,6 +150,19 @@ public class Player : IGameEntity
             Camera2D.X = Pos_X - 400;
         if (Pos_Y > 601)
             Camera2D.Y = 680;
+
+        if (Hurt == true && Hurt_cooldown <= 0)
+        {
+            Hurt = false;
+            Hurt_cooldown = 1500;
+            Player_health--;
+            Console.Write(Player_health);
+        }
+        else if (Hurt_cooldown >= 0)
+        {
+            Hurt = false;
+            Hurt_cooldown -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+        }
         Check_state();
         if (Player_state == State.Idle)
             Anim_current = 0;
@@ -180,7 +199,7 @@ public class Player : IGameEntity
         if (Anim_current < 7)
             Height = 40;
 
-        if (Player_health == Health.Dead)
+        if (Player_health <= Health.Dead)
         {
             Anim_current = 6;
             walk_speed = 0;
@@ -197,6 +216,7 @@ public class Player : IGameEntity
 
             if (x > 550) // good moment, not too long after death on the ground, and pretty decent when somehowe dying on top of the map
             {
+                remove = true;
                 //check for more lifes and if there aren't any, do a game over and close?
                 if (Player_lifes < 0)
                 {
@@ -205,13 +225,18 @@ public class Player : IGameEntity
                 Player_lifes--;
             }
         }
-
-
+        if (Hurt_cooldown > 0 && Player_health > Health.Dead)
+        {
+            i_frames = i_frames ^ true;
+        }
+        else
+            i_frames = false;
+        
         spriteBatch.Draw(
         this.Texture,
         new Vector2(Pos_X, Pos_Y),
         SourceRect[Anim_current],
-        Color.White,
+        (i_frames ? Color.PaleVioletRed : Color.White),
         0f,
         Camera2D + Ded_anim,
         new Vector2(1, 1),

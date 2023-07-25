@@ -190,6 +190,8 @@ class Level
                 return LoadBlock("scenary", TileCollision.Impassable);
             case 'G':
                 return LoadGoombaTile(x, y);
+            case 'K':
+                return LoadKoopaTile(x,y);
             default:
                 throw new NotSupportedException(String.Format("Unsupported tile type character '{0}' at {1}, {2}", tileType, x, y));
         }
@@ -201,7 +203,12 @@ class Level
         e_manager.AddEntity(goomba);
         return null;
     }
-    
+    private Tile LoadKoopaTile(int x, int y)
+    {
+        Koopa koopa = new(x, y, ref Content);
+        e_manager.AddEntity(koopa);
+        return null;
+    }
     private Tile LoadBlock(string name, TileCollision collision)
     {
         return new Tile(Content.Load<Texture2D>(name), collision);

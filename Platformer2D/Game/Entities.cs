@@ -19,6 +19,10 @@ public interface IGameEntity
     Texture2D Texture { get; }
     int Height { get; set; }
     int Width { get; set; }
+    bool Hurt { get; set; }
+    float jump_speed { get; set; }
+    float gravity_accel { get; set; }
+    bool remove { get; set; }
     void Update(GameTime gameTime);
     void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D);
 }
@@ -42,17 +46,28 @@ public class EntityManager
     {
         if (entity is null)
             throw new ArgumentNullException(nameof(entity));
-        if (HasEntity(entity))
+        if (!HasEntity(entity))
             return false;
         _entities.Remove(entity);
         return true;
     }
-    public bool HasEntity(IGameEntity entity) => _entities.Contains(entity);
-
+    public bool HasEntity(IGameEntity entity) 
+    {
+        if (_entities.Contains(entity)) return true;
+        else return false;
+    }
     public void Update(GameTime gameTime)
     {
         foreach (IGameEntity entity in _entities.OrderBy(e => e.UpdateOrder))
             entity.Update(gameTime);
+        foreach (IGameEntity entity in _entities.OrderBy(e => e.UpdateOrder))
+        {
+            if (entity.remove == true)
+            {
+                RemoveEntity(entity); 
+            }
+        }
+
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D)
     {
@@ -83,7 +98,7 @@ public class CollisionManager
                 {
                     if (Tiles[x, y] == null)
                         continue;
-
+                    
                     Rectangle Tile = new(x * 40, y * 40, 40, 40);
                     Vector2 depth = RectangleExtensions.GetIntersectionDepth(entity1_rect, Tile);
                     if (Tiles[x, y]._collision != TileCollision.Passable)
@@ -120,14 +135,14 @@ public class CollisionManager
                             {
                                 entity1.Collision[1] = true;
                                 entity1.Pos_X = Tile.Left - entity1.Width + 0.2f; // weird value, but without it player vibrates when walking into a wall?
-                                if (entity1.Type == "goomba")
+                                if (entity1.Type == "goomba" || entity1.Type == "koopa")
                                     entity1.walk_speed = -entity1.walk_speed;
                             }
                             if (depth.X > 0) // Left wall collision
                             {
                                 entity1.Collision[2] = true;
                                 entity1.Pos_X = Tile.Right;
-                                if (entity1.Type == "goomba")
+                                if (entity1.Type == "goomba" || entity1.Type == "koopa")
                                     entity1.walk_speed = -entity1.walk_speed;
                             }
                         }
@@ -149,25 +164,57 @@ public class CollisionManager
                 {
                     if (depth.Y > 0) // Entity2 on top of Entity1
                     {
-                        
+                        if (entity1.Type == "player")
+                            entity1.Hurt = true;
+                            entity1.jump_speed = 400;
+                        if (entity1.Type != "player" && entity2.Type != "player")
+                            entity2.Collision[0] = true;
                     }
                     else if (depth.Y < 0) // Entity1 on top of Entity2
                     {
-
+                        if (entity1.Type == "player")
+                        {
+                            entity2.Hurt = true;
+                            entity1.gravity_accel = 0;
+                            entity1.jump_speed = 400;
+                        }
+                        if (entity1.Type != "player" && entity2.Type != "player")
+                            entity1.Collision[0] = true;
                     }
                 }
 
                 else if (absDepth.Y > absDepth.X)
                 {
                     // entity1.Pos_X += depth.X;
-
-                    if (depth.X < 0) // Entity1 on the left of Entity2
+                    if (entity1.Type == "player")
                     {
-                    
+                        entity1.Hurt = true;
                     }
-                    if (depth.X > 0) // Entity1 on the right of Entity2
+                    else if (entity2.Type == "player")
                     {
-                    
+                        entity2.Hurt = true;
+                    }
+                    else
+                    {
+                        if (depth.X < 0) // Entity1 on the left of Entity2
+                        {
+                            entity1.Collision[1] = true;
+                            entity2.Collision[2] = true;
+                            entity1.walk_speed = -entity1.walk_speed;
+                            entity1.Pos_X -= 5;
+                            entity2.walk_speed = -entity2.walk_speed;
+                            entity2.Pos_X += 5;
+                        }
+                        if (depth.X > 0) // Entity1 on the right of Entity2
+                        {
+                            entity1.Collision[2] = true;
+                            entity2.Collision[1] = true;
+                            entity1.walk_speed = -entity1.walk_speed;
+                            entity1.Pos_X -= 5;
+                            entity2.walk_speed = -entity2.walk_speed;
+                            entity2.Pos_X += 5;
+                        }
+
                     }
                 }
             }
