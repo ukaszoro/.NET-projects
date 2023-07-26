@@ -74,8 +74,12 @@ public class Tile
             Sourcerect[1] = new(20,0,20,20);
             Sourcerect[2] = new(0,20,20,20);
             Sourcerect[3] = new(20,20,20,20);
-            Hit = false;
-            _collision = TileCollision.Passable;
+
+            if (Anim_X > 20)
+            {
+                Hit = false;
+                _collision = TileCollision.Passable;
+            }
             for (int i = 0; i < 4; i++)
             {
                 if (i < 2)
@@ -107,7 +111,7 @@ public class Tile
             }
 
         }
-        if (Hit == true)
+        if (Hit && !Break)
         {
             if (Anim_X < 6 && _collision != TileCollision.Mysteryblock)
                 Sound[0].Play();
@@ -150,7 +154,7 @@ public class Tile
             );
     }
 }
-class Level
+public class Level
 {
     private Tile[,] tiles;
     private Texture2D[] Layers;
@@ -162,6 +166,7 @@ class Level
     ContentManager Content;
     EntityManager e_manager = new EntityManager();
     CollisionManager c_manager;
+    Hud Hud;
     Vector2 Camera2D;
     Song song;
 
@@ -169,18 +174,22 @@ class Level
     public int Score { get; }
     public bool reachedExit { get; }
     public TimeSpan TimeRemaining { get; }
-    public int Lives;
+    public int Lives { get; set; }
+    public int coins { get; set; }
     public bool restart;
     
-    public Level(Stream fileStream, int LevelIndex, ContentManager content)
+    public Level(Stream fileStream, int LevelIndex, ContentManager content, int lives)
     {
         Content = content;
         TimeRemaining = TimeSpan.FromMinutes(2.0);
-        Lives = 3;
+        Lives = lives;
         LoadMapFile(fileStream);
+        Hud = new(this, Content);
         song = content.Load<Song>("theme");
         MediaPlayer.Play(song);
         MediaPlayer.IsRepeating = true;
+        MediaPlayer.Volume = 0.1f;
+        SoundEffect.MasterVolume = 0.2f;
     }
     private void LoadMapFile(Stream fileStream)
     {
@@ -266,7 +275,7 @@ class Level
         if (player != null)
             throw new NotSupportedException("A lavel may only have one starting point.");
 
-        player = new Player(x, y, ref Content, ref Lives);
+        player = new Player(x, y, ref Content, Lives);
         e_manager.AddEntity(player);
 
         return null;
@@ -306,6 +315,7 @@ class Level
                     tiles[i, j].Draw(spriteBatch, i, j, Camera2D, gameTime);
             }
         e_manager.Draw(spriteBatch, gameTime, ref Camera2D);
+        Hud.Draw(spriteBatch, gameTime);
     }
 }
 

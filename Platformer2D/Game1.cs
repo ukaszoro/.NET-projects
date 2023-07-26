@@ -9,6 +9,7 @@ public class Game1 : Game
 {
     Player player;
     Level level;
+    int Lives;
 
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
@@ -22,27 +23,32 @@ public class Game1 : Game
         _graphics.PreferredBackBufferWidth = 800;
         _graphics.PreferredBackBufferHeight = 600;
         _graphics.ApplyChanges();
+        Lives = 4;
     }
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
-        level = new(File.Open("./Maps/Map0", FileMode.Open), 0, Content);
+        Lives --;
+        if (Lives >= 0)
+        level = new(File.Open("./Maps/Map0", FileMode.Open), 0, Content, Lives);
+        else 
+        {
+            GraphicsDevice.Clear(Color.Black);
+            Exit();
+            // TODO:Game over, 
+        }
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-
-        // TODO: use this.Content to load your game content here
     }
     protected override void Update(GameTime gameTime)
     {
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        // TODO: Add your update logic here
         if (level.restart == true)
             Initialize();
         
@@ -53,8 +59,8 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(new Color(92, 148, 252));
+
         _spriteBatch.Begin();
-        // TODO: Add your drawing code here
         level.Draw(_spriteBatch, gameTime);
         _spriteBatch.End();
         base.Draw(gameTime);

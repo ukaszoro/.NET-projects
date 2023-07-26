@@ -59,7 +59,7 @@ public class Player : IGameEntity
     bool i_frames;
     public bool remove { get; set; }
 
-    public Player(int x, int y, ref ContentManager Content, ref int lives)
+    public Player(int x, int y, ref ContentManager Content, int lives)
     {
         Texture = Content.Load<Texture2D>("player");
         Type = "player";
