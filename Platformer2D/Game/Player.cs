@@ -51,6 +51,7 @@ public class Player : IGameEntity
     Health Player_health;
     public int Player_lifes { get; set; }
     public bool Hurt { get; set; }
+    public bool Hurt_up { get; set; }
     float Hurt_cooldown;
     bool i_frames;
     public bool remove { get; set; }

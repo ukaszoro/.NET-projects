@@ -27,19 +27,39 @@ public class Tile
     public bool Break { get; set; }
     public Vector2 Hit_anim = new(0,0);
     public float Anim_timer;
+    public int Anim_current;
     float Anim_X = 0;
+    Rectangle[] Sourcerect;
 
     public Tile(Texture2D texture, TileCollision collision)
     {
         _texture = texture;
         _collision = collision;
+        Anim_current = 0;
+        Sourcerect = new Rectangle[4];
+        if (collision == TileCollision.Mysteryblock)
+        {
+            Sourcerect[0] = new(0, 0, 40, 40);
+            Sourcerect[1] = new(40, 0, 40, 40);
+            Sourcerect[2] = new(80, 0, 40, 40);
+            Sourcerect[3] = new(120, 0, 40, 40);
+        }
     }
     public void Draw(SpriteBatch spriteBatch, int x, int y, Vector2 Camera2D, GameTime gameTime)
     {
         Vector2 tmp_pos = new(x, y);
+        if (_collision == TileCollision.Mysteryblock)
+        {
+            if (Anim_timer >= 400 / (Anim_current+1))
+            {
+                Anim_current = (Anim_current + 1) % 3;
+                Anim_timer = 0;
+            }
+            else
+                Anim_timer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+        }
         if (Break == true)
         {
-            Rectangle[] Sourcerect = new Rectangle[4];
             Sourcerect[0] = new(0,0,20,20);
             Sourcerect[1] = new(20,0,20,20);
             Sourcerect[2] = new(0,20,20,20);
@@ -79,6 +99,9 @@ public class Tile
         }
         if (Hit == true)
         {
+            if (_collision == TileCollision.Mysteryblock)
+                Anim_current = 3;
+                
             if (Anim_timer >= 6)
             {
                 Hit_anim.Y = (0.01f * -Anim_X * Anim_X + 1.2f * Anim_X);
@@ -94,13 +117,14 @@ public class Tile
             Hit_anim.Y = 0;
             Anim_timer = 0;
             Anim_X = 0;
+            Anim_current = 0;
         }
 
         if (Break != true)
             spriteBatch.Draw(
             _texture,
             tmp_pos * Size,
-            null,
+            (_collision == TileCollision.Mysteryblock ? Sourcerect[Anim_current] : null),
             Color.White,
             0f,
             Camera2D + Hit_anim,

@@ -20,6 +20,7 @@ public interface IGameEntity
     int Height { get; set; }
     int Width { get; set; }
     bool Hurt { get; set; }
+    bool Hurt_up { get; set; }
     float jump_speed { get; set; }
     float gravity_accel { get; set; }
     bool remove { get; set; }
@@ -124,6 +125,8 @@ public class CollisionManager
                             {
                                 entity1.Collision[0] = true;
                                 entity1.Pos_Y = Tile.Top - entity1.Height + 1;
+                                if (Tiles[x,y].Hit == true)
+                                    entity1.Hurt_up = true;
                             }
                         }
 
@@ -135,14 +138,14 @@ public class CollisionManager
                             {
                                 entity1.Collision[1] = true;
                                 entity1.Pos_X = Tile.Left - entity1.Width + 0.2f; // weird value, but without it player vibrates when walking into a wall?
-                                if (entity1.Type == "goomba" || entity1.Type == "koopa")
+                                if (entity1.Type == "goomba" || entity1.Type == "koopa" || entity1.Type == "koopa_shell")
                                     entity1.walk_speed = -entity1.walk_speed;
                             }
                             if (depth.X > 0) // Left wall collision
                             {
                                 entity1.Collision[2] = true;
                                 entity1.Pos_X = Tile.Right;
-                                if (entity1.Type == "goomba" || entity1.Type == "koopa")
+                                if (entity1.Type == "goomba" || entity1.Type == "koopa" || entity1.Type == "koopa_shell")
                                     entity1.walk_speed = -entity1.walk_speed;
                             }
                         }
@@ -153,7 +156,8 @@ public class CollisionManager
             {
                 if (entity1 == entity2)
                     continue;
-
+                if (entity1.Type == "ded" || entity2.Type == "ded")
+                    continue;
                 Rectangle entity2_rect = new((int)entity2.Pos_X, (int)entity2.Pos_Y, (int)entity2.Width, (int)entity2.Height);
                 Vector2 depth = RectangleExtensions.GetIntersectionDepth(entity1_rect, entity2_rect);
                 if (depth == Vector2.One)
@@ -204,6 +208,11 @@ public class CollisionManager
                             entity1.Pos_X -= 5;
                             entity2.walk_speed = -entity2.walk_speed;
                             entity2.Pos_X += 5;
+                            if (entity1.Type == "koopa_shell" && entity1.walk_speed != 0)
+                            {
+                                entity2.Hurt_up = true;
+                                entity1.walk_speed = -entity1.walk_speed;
+                            }
                         }
                         if (depth.X > 0) // Entity1 on the right of Entity2
                         {
@@ -213,6 +222,11 @@ public class CollisionManager
                             entity1.Pos_X -= 5;
                             entity2.walk_speed = -entity2.walk_speed;
                             entity2.Pos_X += 5;
+                            if (entity1.Type == "koopa_shell" && entity1.walk_speed != 0)
+                            {
+                                entity2.Hurt_up = true;
+                                entity1.walk_speed = -entity1.walk_speed;
+                            }
                         }
 
                     }

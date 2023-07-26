@@ -7,7 +7,7 @@ namespace Platformer2D;
 
 public class Goomba : IGameEntity
 {
-    public string Type { get; }
+    public string Type { get; set; }
     public bool[] Collision { get; }
     public int DrawOrder { get; }
     public int UpdateOrder { get; }
@@ -18,6 +18,7 @@ public class Goomba : IGameEntity
     public int Height { get; set; }
     public int Width { get; set; }
     public bool Hurt { get; set; }
+    public bool Hurt_up { get; set; }
     public float jump_speed { get; set; }
     public float gravity_accel { get; set; }
     public bool remove { get; set; }
@@ -30,6 +31,7 @@ public class Goomba : IGameEntity
     int rotation;
     Vector2 Dead_anim;
     Rectangle[] SourceRect;
+    float X;
 
     public Goomba(int x, int y, ref ContentManager Content)
     {
@@ -46,6 +48,7 @@ public class Goomba : IGameEntity
         Dead_anim = new(0,0);
         walk_speed = 0;
         Anim_current = 0;
+        X = 0;
 
         SourceRect = new Rectangle[3];
         SourceRect[0] = new(0,0,40,40);
@@ -75,7 +78,21 @@ public class Goomba : IGameEntity
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D)
     {
-        if (Hurt == true)
+        if (Hurt_up == true)
+        {
+            Type = "ded";
+            if (Anim_timer >= 10)
+            {
+                Dead_anim.Y = (0.01f * -X * X + X);
+                X += 4;
+            }
+            else
+                Anim_timer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+
+            if (X > 300)
+                remove = true;
+        }
+        else if (Hurt == true)
         {
             Anim_current = 2;
             if (Anim_timer >= 400)
@@ -106,14 +123,14 @@ public class Goomba : IGameEntity
         0f,
         Camera2D + Dead_anim,
         new Vector2(1, 1),
-        (rotation == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally),
+        (Hurt_up ? SpriteEffects.FlipVertically : (rotation == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally)),
         0f
         );
     }
 }
 public class Koopa : IGameEntity
 {
-    public string Type { get; }
+    public string Type { get; set;}
     public bool[] Collision { get; }
     public int DrawOrder { get; }
     public int UpdateOrder { get; }
@@ -124,6 +141,7 @@ public class Koopa : IGameEntity
     public int Height { get; set; }
     public int Width { get; set; }
     public bool Hurt { get; set; }
+    public bool Hurt_up { get; set; }
     public float jump_speed { get; set; }
     public float gravity_accel { get; set; }
     public bool remove { get; set; }
@@ -136,6 +154,7 @@ public class Koopa : IGameEntity
     int rotation;
     Vector2 Dead_anim;
     Rectangle[] SourceRect;
+    bool spawned;
 
     public Koopa(int x, int y, ref ContentManager Content)
     {
@@ -181,15 +200,21 @@ public class Koopa : IGameEntity
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D)
     {
-        if (Hurt == true)
+        if (Hurt == true && Type == "koopa")
         {
-            Anim_current = 2;
-            if (Anim_timer >= 400)
-            {
-                remove = true;
-            }
-            else
-                Anim_timer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+            Type = "koopa_shell";
+            walk_speed = 0;
+            Hurt = false;
+        }
+        else if (Hurt == true && walk_speed == 0)
+        {
+            walk_speed = 300;
+            Hurt = false;
+        }
+        else if (Hurt == true && walk_speed != 0)
+        {
+            walk_speed = 0;
+            Hurt = false;
         }
         else
         {
@@ -201,13 +226,17 @@ public class Koopa : IGameEntity
             else
                 Anim_timer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
         }
-        if (Pos_X - Camera2D.X < 1000 && walk_speed == 0)
+        if (Pos_X - Camera2D.X < 1000 && spawned == false)
+        {
             walk_speed = -60;
+            spawned = true;
+        }
         if (walk_speed < 0)
             rotation = 1;
         else
             rotation = 0;
-        
+        if (Type == "koopa_shell")
+            Anim_current = 2;
         spriteBatch.Draw(
         Texture,
         new Vector2(Pos_X, Pos_Y),
