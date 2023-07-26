@@ -8,8 +8,6 @@ namespace Platformer2D;
 public class Game1 : Game
 {
     Player player;
-    EntityManager e_manager;
-    static float world_gravity = 10f;
     Level level;
 
     private GraphicsDeviceManager _graphics;
@@ -30,9 +28,6 @@ public class Game1 : Game
     {
         // TODO: Add your initialization logic here
         level = new(File.Open("./Maps/Map0", FileMode.Open), 0, Content);
-        // player.UpdateOrder = 1;
-
-
         base.Initialize();
     }
 
@@ -41,15 +36,16 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // TODO: use this.Content to load your game content here
-
     }
-
     protected override void Update(GameTime gameTime)
     {
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
         // TODO: Add your update logic here
+        if (level.restart == true)
+            Initialize();
+        
         level.Update(gameTime);
         base.Update(gameTime);
     }

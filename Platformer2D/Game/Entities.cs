@@ -24,6 +24,7 @@ public interface IGameEntity
     float jump_speed { get; set; }
     float gravity_accel { get; set; }
     bool remove { get; set; }
+    Health Health { get; set; }
     void Update(GameTime gameTime);
     void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D);
 }
@@ -99,16 +100,18 @@ public class CollisionManager
                 {
                     if (Tiles[x, y] == null)
                         continue;
-                    
                     Rectangle Tile = new(x * 40, y * 40, 40, 40);
                     Vector2 depth = RectangleExtensions.GetIntersectionDepth(entity1_rect, Tile);
                     if (Tiles[x, y]._collision != TileCollision.Passable)
                     {
                         if (depth == Vector2.Zero)
                             continue;
+                        if (Tiles[x, y]._collision == TileCollision.Deathzone)
+                            entity1.Health = 0;
                         Vector2 absDepth = new(Math.Abs(depth.X), Math.Abs(depth.Y));
                         if (absDepth.Y < absDepth.X)
                         {
+
                             if (depth.Y > 0)
                             {
                                 entity1.Collision[3] = true;

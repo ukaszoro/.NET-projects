@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Content;
@@ -38,6 +39,8 @@ public class Player : IGameEntity
     public int Height { get; set; }
     public int Width { get; set; }
 
+    public SoundEffect[] Sound;
+
     public Texture2D Texture { get; }
     State Player_state;    // variables for animations
     Rectangle[] SourceRect;
@@ -48,7 +51,7 @@ public class Player : IGameEntity
     Vector2 Ded_anim; float x; // Both for displaying a nice game over animation
     bool Lock;
 
-    Health Player_health;
+    public Health Health { get; set; }
     public int Player_lifes { get; set; }
     public bool Hurt { get; set; }
     public bool Hurt_up { get; set; }
@@ -60,6 +63,10 @@ public class Player : IGameEntity
     {
         Texture = Content.Load<Texture2D>("player");
         Type = "player";
+        Sound = new SoundEffect[2];
+        Sound[0] = Content.Load<SoundEffect>("jump");
+        Sound[1] = Content.Load<SoundEffect>("mario_die");
+        
         Collision = new bool[4];
         Pos_X = x * Tile.Size.X;
         Pos_Y = y * Tile.Size.Y;
@@ -89,7 +96,7 @@ public class Player : IGameEntity
         x = 0;
         Hurt_cooldown = 0f;
 
-        Player_health = Health.Small;
+        Health = Health.Small;
         Height = 40; Width = 40;
         Player_lifes = lives;
     }
@@ -110,7 +117,7 @@ public class Player : IGameEntity
         // }
         if (kstate.IsKeyDown(Keys.Down))
         {
-            Player_health++;
+            Health++;
         }
         if (kstate.IsKeyDown(Keys.Left))
         {
@@ -156,8 +163,8 @@ public class Player : IGameEntity
         {
             Hurt = false;
             Hurt_cooldown = 1500;
-            Player_health--;
-            Console.Write(Player_health);
+            Health--;
+            Console.Write(Health);
         }
         else if (Hurt_cooldown >= 0)
         {
@@ -189,7 +196,7 @@ public class Player : IGameEntity
             Anim_current = 4;
         if (Player_state == State.Breaking)
             Anim_current = 5;
-        if (Player_health > Health.Small && Anim_current < 7)
+        if (Health > Health.Small && Anim_current < 7)
         {
             if (Height == 40)
                 Pos_Y -= 40;
@@ -200,12 +207,16 @@ public class Player : IGameEntity
         if (Anim_current < 7)
             Height = 40;
 
-        if (Player_health <= Health.Dead)
+        if (Health <= Health.Dead)
         {
             Anim_current = 6;
             walk_speed = 0;
             gravity_accel = 0; //set all movement to 0 so mario doesn't move at all
             jump_speed = 0;
+            if (x < 1)
+            {
+                Sound[1].Play();
+            }
 
             if (Anim_timer >= 20)
             {
@@ -226,7 +237,7 @@ public class Player : IGameEntity
                 Player_lifes--;
             }
         }
-        if (Hurt_cooldown > 0 && Player_health > Health.Dead)
+        if (Hurt_cooldown > 0 && Health > Health.Dead)
         {
             i_frames = i_frames ^ true;
         }
@@ -248,7 +259,7 @@ public class Player : IGameEntity
     }
     public void Update(GameTime gameTime)
     {
-        if (Player_health != Health.Dead)
+        if (Health != Health.Dead)
             HandleInput(this);
 
 
@@ -275,6 +286,8 @@ public class Player : IGameEntity
             gravity_accel = 0;
             jump_speed = 0;
         }
+        if (jump_speed > 0 && gravity_accel < 1.5*_world_gravity)
+            Sound[0].Play();
         Pos_Y -= (jump_speed - gravity_accel) * Elapsed_time;
     }
     void Check_state()

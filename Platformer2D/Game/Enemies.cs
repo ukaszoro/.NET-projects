@@ -22,6 +22,7 @@ public class Goomba : IGameEntity
     public float jump_speed { get; set; }
     public float gravity_accel { get; set; }
     public bool remove { get; set; }
+    public Health Health { get; set; }
 
     float max_fall;
     float _world_gravity;
@@ -145,6 +146,7 @@ public class Koopa : IGameEntity
     public float jump_speed { get; set; }
     public float gravity_accel { get; set; }
     public bool remove { get; set; }
+    public Health Health { get; set; }
 
     float max_fall;
     float _world_gravity;

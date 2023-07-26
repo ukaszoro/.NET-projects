@@ -1,4 +1,6 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -13,6 +15,7 @@ public enum TileCollision
     Impassable = 1,
     Breakable = 2,
     Mysteryblock = 3,
+    Deathzone = 4,
 }
 public class Tile
 {
@@ -30,8 +33,9 @@ public class Tile
     public int Anim_current;
     float Anim_X = 0;
     Rectangle[] Sourcerect;
+    SoundEffect[] Sound;
 
-    public Tile(Texture2D texture, TileCollision collision)
+    public Tile(Texture2D texture, TileCollision collision, ContentManager Content)
     {
         _texture = texture;
         _collision = collision;
@@ -44,6 +48,10 @@ public class Tile
             Sourcerect[2] = new(80, 0, 40, 40);
             Sourcerect[3] = new(120, 0, 40, 40);
         }
+        Sound = new SoundEffect[3];
+        Sound[0] = Content.Load<SoundEffect>("block_bump");
+        Sound[1] = Content.Load<SoundEffect>("block_break");
+        Sound[2] = Content.Load<SoundEffect>("coin");
     }
     public void Draw(SpriteBatch spriteBatch, int x, int y, Vector2 Camera2D, GameTime gameTime)
     {
@@ -60,6 +68,8 @@ public class Tile
         }
         if (Break == true)
         {
+            if (Anim_X < 5)
+                Sound[1].Play();
             Sourcerect[0] = new(0,0,20,20);
             Sourcerect[1] = new(20,0,20,20);
             Sourcerect[2] = new(0,20,20,20);
@@ -99,8 +109,14 @@ public class Tile
         }
         if (Hit == true)
         {
+            if (Anim_X < 6 && _collision != TileCollision.Mysteryblock)
+                Sound[0].Play();
+            else if (Anim_X < 6 && _collision == TileCollision.Mysteryblock)
+                Sound[2].Play();
             if (_collision == TileCollision.Mysteryblock)
+            {
                 Anim_current = 3;
+            }
                 
             if (Anim_timer >= 6)
             {
@@ -147,18 +163,24 @@ class Level
     EntityManager e_manager = new EntityManager();
     CollisionManager c_manager;
     Vector2 Camera2D;
+    Song song;
 
     public Player player { get; set; }
     public int Score { get; }
     public bool reachedExit { get; }
     public TimeSpan TimeRemaining { get; }
     public int Lives;
+    public bool restart;
+    
     public Level(Stream fileStream, int LevelIndex, ContentManager content)
     {
         Content = content;
         TimeRemaining = TimeSpan.FromMinutes(2.0);
         Lives = 3;
         LoadMapFile(fileStream);
+        song = content.Load<Song>("theme");
+        MediaPlayer.Play(song);
+        MediaPlayer.IsRepeating = true;
     }
     private void LoadMapFile(Stream fileStream)
     {
@@ -216,6 +238,8 @@ class Level
                 return LoadGoombaTile(x, y);
             case 'K':
                 return LoadKoopaTile(x,y);
+            case ';':
+                return LoadBlock("invisible",TileCollision.Deathzone);
             default:
                 throw new NotSupportedException(String.Format("Unsupported tile type character '{0}' at {1}, {2}", tileType, x, y));
         }
@@ -235,7 +259,7 @@ class Level
     }
     private Tile LoadBlock(string name, TileCollision collision)
     {
-        return new Tile(Content.Load<Texture2D>(name), collision);
+        return new Tile(Content.Load<Texture2D>(name), collision, Content);
     }
     private Tile LoadStartTile(int x, int y)
     {
@@ -264,6 +288,14 @@ class Level
         e_manager.Update(gameTime);
         c_manager = new(e_manager);
         c_manager.check_collision(ref tiles);
+        if (player.Health < Health.Dead)
+        {
+            MediaPlayer.Stop();
+        }
+        if (!e_manager._entities.Contains(player))
+        {
+            restart = true;
+        }
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
