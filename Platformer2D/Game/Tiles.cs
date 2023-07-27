@@ -15,7 +15,8 @@ public enum TileCollision
     Impassable = 1,
     Breakable = 2,
     Mysteryblock = 3,
-    Deathzone = 4,
+    Mysteryblock_empty = 4,
+    Deathzone = 5,
 }
 public class Tile
 {
@@ -34,12 +35,15 @@ public class Tile
     float Anim_X = 0;
     Rectangle[] Sourcerect;
     SoundEffect[] Sound;
+    int Contains;
 
-    public Tile(Texture2D texture, TileCollision collision, ContentManager Content)
+    
+    public Tile(Texture2D texture, TileCollision collision, ContentManager Content, int contains)
     {
         _texture = texture;
         _collision = collision;
         Anim_current = 0;
+        Contains = contains;
         Sourcerect = new Rectangle[4];
         if (collision == TileCollision.Mysteryblock)
         {
@@ -51,11 +55,14 @@ public class Tile
         Sound = new SoundEffect[3];
         Sound[0] = Content.Load<SoundEffect>("block_bump");
         Sound[1] = Content.Load<SoundEffect>("block_break");
-        Sound[2] = Content.Load<SoundEffect>("coin");
+        Sound[2] = Content.Load<SoundEffect>("coin_sound");
     }
-    public void Draw(SpriteBatch spriteBatch, int x, int y, Vector2 Camera2D, GameTime gameTime)
+    public void Draw(SpriteBatch spriteBatch, int x, int y, Vector2 Camera2D, GameTime gameTime, Level Level)
     {
         Vector2 tmp_pos = new(x, y);
+        if (_collision == TileCollision.Mysteryblock && Contains == 0)
+            _collision = TileCollision.Mysteryblock_empty;
+            
         if (_collision == TileCollision.Mysteryblock)
         {
             if (Anim_timer >= 400 / (Anim_current+1))
@@ -66,6 +73,9 @@ public class Tile
             else
                 Anim_timer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
         }
+        else if (_collision == TileCollision.Mysteryblock_empty)
+            Anim_current = 3;
+            
         if (Break == true)
         {
             if (Anim_X < 5)
@@ -120,6 +130,16 @@ public class Tile
             if (_collision == TileCollision.Mysteryblock)
             {
                 Anim_current = 3;
+                if (Contains > 0)
+                {
+                    Level.coins++;
+                    Contains--;
+                }
+                if (Contains < 0)
+                {
+                    Level.Spawn_powerup(tmp_pos * Size);
+                    Contains++;
+                }
             }
                 
             if (Anim_timer >= 6)
@@ -144,7 +164,7 @@ public class Tile
             spriteBatch.Draw(
             _texture,
             tmp_pos * Size,
-            (_collision == TileCollision.Mysteryblock ? Sourcerect[Anim_current] : null),
+            ((_collision == TileCollision.Mysteryblock || _collision == TileCollision.Mysteryblock_empty) ? Sourcerect[Anim_current] : null),
             Color.White,
             0f,
             Camera2D + Hit_anim,
@@ -171,9 +191,9 @@ public class Level
     Song song;
 
     public Player player { get; set; }
-    public int Score { get; }
+    public int Score { get; set; }
     public bool reachedExit { get; }
-    public TimeSpan TimeRemaining { get; }
+    public float TimeRemaining { get; set; }
     public int Lives { get; set; }
     public int coins { get; set; }
     public bool restart;
@@ -181,7 +201,8 @@ public class Level
     public Level(Stream fileStream, int LevelIndex, ContentManager content, int lives)
     {
         Content = content;
-        TimeRemaining = TimeSpan.FromMinutes(2.0);
+        TimeRemaining = 120;
+        coins = 0;
         Lives = lives;
         LoadMapFile(fileStream);
         Hud = new(this, Content);
@@ -226,29 +247,35 @@ public class Level
             case '*':
                 return null;
             case '#':
-                return LoadBlock("block", TileCollision.Impassable);
+                return LoadBlock((y < 18 ? "block" : "block_b"), TileCollision.Impassable, 0);
             case '=':
-                return LoadBlock("brick", TileCollision.Breakable);
+                return LoadBlock((y < 18 ? "brick" : "brick_b"), TileCollision.Breakable, 0);
             case '?':
-                return LoadBlock("mystery_block", TileCollision.Mysteryblock);
+                return LoadBlock("mystery_block", TileCollision.Mysteryblock, 1); // The block with 1 coin
+            case '/':
+                return LoadBlock("mystery_block", TileCollision.Mysteryblock, -1); // The block with the power up
+            case '$':
+                return LoadCoinTile(x, y);
             case '&':
-                return LoadBlock("stair", TileCollision.Impassable);
+                return LoadBlock("stair", TileCollision.Impassable, 0);
             case 'I':
-                return LoadBlock("pipe_part", TileCollision.Impassable);
+                return LoadBlock("pipe_part", TileCollision.Impassable, 0);
             case '^':
-                return LoadBlock("pipe_end", TileCollision.Impassable);
+                return LoadBlock("pipe_end", TileCollision.Impassable, 0);
+            case '<':
+                return LoadBlock("side_pipe_end", TileCollision.Impassable, 0);
             case '.':
-                return LoadBlock("invisible", TileCollision.Impassable);
+                return LoadBlock("invisible", TileCollision.Impassable, 0);
             case '1':
                 return LoadStartTile(x, y);
             case '@':
-                return LoadBlock("scenary", TileCollision.Impassable);
+                return LoadBlock("scenary", TileCollision.Impassable, 0);
             case 'G':
                 return LoadGoombaTile(x, y);
             case 'K':
                 return LoadKoopaTile(x,y);
             case ';':
-                return LoadBlock("invisible",TileCollision.Deathzone);
+                return LoadBlock("invisible",TileCollision.Deathzone, 0);
             default:
                 throw new NotSupportedException(String.Format("Unsupported tile type character '{0}' at {1}, {2}", tileType, x, y));
         }
@@ -266,9 +293,15 @@ public class Level
         e_manager.AddEntity(koopa);
         return null;
     }
-    private Tile LoadBlock(string name, TileCollision collision)
+    private Tile LoadCoinTile(int x, int y)
     {
-        return new Tile(Content.Load<Texture2D>(name), collision, Content);
+        Coin coin = new(x, y, Content);
+        e_manager.AddEntity(coin);
+        return null;
+    }
+    private Tile LoadBlock(string name, TileCollision collision, int block_content)
+    {
+        return new Tile(Content.Load<Texture2D>(name), collision, Content, block_content);
     }
     private Tile LoadStartTile(int x, int y)
     {
@@ -279,6 +312,19 @@ public class Level
         e_manager.AddEntity(player);
 
         return null;
+    }
+    public void Spawn_powerup(Vector2 Pos)
+    {
+        if (player.Health == Health.Small)
+        {
+            Mushroom muschroom = new(Pos, Content);
+            e_manager.AddEntity(muschroom);
+        }
+        else if (player.Health > Health.Small)
+        {
+            FFlower fflower = new(Pos, Content);
+            e_manager.AddEntity(fflower);
+        }        
     }
 
     public int Height { get { return tiles.GetLength(1); } }
@@ -294,9 +340,9 @@ public class Level
                         tiles[i, j]._texture = Content.Load<Texture2D>("brick_debre");
                     }
             }
-        e_manager.Update(gameTime);
+        e_manager.Update(gameTime, this);
         c_manager = new(e_manager);
-        c_manager.check_collision(ref tiles);
+        c_manager.check_collision(ref tiles, this);
         if (player.Health < Health.Dead)
         {
             MediaPlayer.Stop();
@@ -305,6 +351,9 @@ public class Level
         {
             restart = true;
         }
+        TimeRemaining -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        if (TimeRemaining < 0)
+            player.Health = Health.Dead;
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
@@ -312,7 +361,7 @@ public class Level
             for (int j = 0; j < Height; j++)
             {
                 if (!(tiles[i, j] == null))
-                    tiles[i, j].Draw(spriteBatch, i, j, Camera2D, gameTime);
+                    tiles[i, j].Draw(spriteBatch, i, j, Camera2D, gameTime, this);
             }
         e_manager.Draw(spriteBatch, gameTime, ref Camera2D);
         Hud.Draw(spriteBatch, gameTime);

@@ -58,7 +58,7 @@ public class EntityManager
         if (_entities.Contains(entity)) return true;
         else return false;
     }
-    public void Update(GameTime gameTime)
+    public void Update(GameTime gameTime, Level Level)
     {
         foreach (IGameEntity entity in _entities.OrderBy(e => e.UpdateOrder))
             entity.Update(gameTime);
@@ -66,6 +66,8 @@ public class EntityManager
         {
             if (entity.remove == true)
             {
+                if (entity.Type != "coin")
+                    Level.Score += 100;
                 RemoveEntity(entity); 
             }
         }
@@ -85,7 +87,7 @@ public class CollisionManager
     {
         _entities = e_manager._entities;
     }
-    public void check_collision(ref Tile[,] Tiles)
+    public void check_collision(ref Tile[,] Tiles, Level level)
     {
         foreach (IGameEntity entity1 in _entities.OrderBy(e => e.UpdateOrder))
         {
@@ -107,7 +109,10 @@ public class CollisionManager
                         if (depth == Vector2.Zero)
                             continue;
                         if (Tiles[x, y]._collision == TileCollision.Deathzone)
+                        {
                             entity1.Health = 0;
+                            continue;
+                        }
                         Vector2 absDepth = new(Math.Abs(depth.X), Math.Abs(depth.Y));
                         if (absDepth.Y < absDepth.X)
                         {
@@ -135,20 +140,18 @@ public class CollisionManager
 
                         else if (absDepth.Y > absDepth.X)
                         {
-                            // entity1.Pos_X += depth.X;
-
                             if (depth.X < 0) // Right wall collision
                             {
                                 entity1.Collision[1] = true;
                                 entity1.Pos_X = Tile.Left - entity1.Width + 0.2f; // weird value, but without it player vibrates when walking into a wall?
-                                if (entity1.Type == "goomba" || entity1.Type == "koopa" || entity1.Type == "koopa_shell")
+                                if (entity1.Type != "player")
                                     entity1.walk_speed = -entity1.walk_speed;
                             }
                             if (depth.X > 0) // Left wall collision
                             {
                                 entity1.Collision[2] = true;
                                 entity1.Pos_X = Tile.Right;
-                                if (entity1.Type == "goomba" || entity1.Type == "koopa" || entity1.Type == "koopa_shell")
+                                if (entity1.Type != "player")
                                     entity1.walk_speed = -entity1.walk_speed;
                             }
                         }
@@ -167,14 +170,51 @@ public class CollisionManager
                     continue;
                 Vector2 absDepth = new(Math.Abs(depth.X), Math.Abs(depth.Y));
 
+                if (depth != Vector2.Zero && entity1.Type == "player" && entity2.Type == "mushroom")
+                {
+                    entity1.Health = Health.Big;
+                    entity2.remove = true;
+                    continue;
+                }
+                else if (depth != Vector2.Zero && entity2.Type == "player" && entity1.Type == "mushroom")
+                {
+                    entity2.Health = Health.Big;
+                    entity1.remove = true;
+                    continue;
+                }
+                if (depth != Vector2.Zero && entity1.Type == "player" && entity2.Type == "fflower")
+                {
+                    entity1.Health = Health.Flower;
+                    entity2.remove = true;
+                    continue;
+                }
+                else if (depth != Vector2.Zero && entity2.Type == "player" && entity1.Type == "fflower")
+                {
+                    entity2.Health = Health.Flower;
+                    entity1.remove = true;
+                    continue;
+                }
+                else if (depth != Vector2.Zero && entity1.Type == "coin" && entity2.Type == "player")
+                {
+                    entity1.remove = true;
+                    level.coins++;
+                    continue;
+                }
+                else if (depth != Vector2.Zero && entity2.Type == "coin" && entity1.Type == "player")
+                {
+                    continue; //if they both give a coin, you get both so one of them does nothing 
+                }
+
                 if (absDepth.Y < absDepth.X)
                 {
                     if (depth.Y > 0) // Entity2 on top of Entity1
                     {
                         if (entity1.Type == "player")
+                        {
                             entity1.Hurt = true;
                             entity1.jump_speed = 400;
-                        if (entity1.Type != "player" && entity2.Type != "player")
+                        }
+                        else if (entity1.Type != "player" && entity2.Type != "player")
                             entity2.Collision[0] = true;
                     }
                     else if (depth.Y < 0) // Entity1 on top of Entity2
@@ -185,7 +225,7 @@ public class CollisionManager
                             entity1.gravity_accel = 0;
                             entity1.jump_speed = 400;
                         }
-                        if (entity1.Type != "player" && entity2.Type != "player")
+                        else if (entity1.Type != "player" && entity2.Type != "player")
                             entity1.Collision[0] = true;
                     }
                 }

@@ -1,11 +1,7 @@
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Media;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.IO;
 
 namespace Platformer2D;
 
@@ -13,7 +9,6 @@ public class Hud
 {
     Level Level;
     ContentManager Content;
-    string text = "mario";
     SpriteFont Font;
     Texture2D Mario;
     Rectangle Mariohead = new(0,40,40,30);
@@ -39,6 +34,6 @@ public class Hud
         spriteBatch.DrawString(Font,"Score", new Vector2(420,0),Color.White);
         spriteBatch.DrawString(Font,Convert.ToString(Level.Score), new Vector2(430,30),Color.White);
         spriteBatch.DrawString(Font,"Time Left", new Vector2(620,0),Color.White);
-        spriteBatch.DrawString(Font,Convert.ToString(Level.TimeRemaining.TotalSeconds), new Vector2(660,30),Color.White);
+        spriteBatch.DrawString(Font,Convert.ToString((int)Level.TimeRemaining), new Vector2(660,30),Color.White);
     }
 }

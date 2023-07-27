@@ -19,6 +19,7 @@ public enum State
     Running = 1,
     InAir = 2,
     Breaking = 3,
+    Crouching = 4,
 }
 public class Player : IGameEntity
 {
@@ -117,7 +118,11 @@ public class Player : IGameEntity
         // }
         if (kstate.IsKeyDown(Keys.Down))
         {
-            Health++;
+            Player_state = State.Crouching;
+        }
+        else if (kstate.IsKeyUp(Keys.Down))
+        {
+            Player_state = State.Idle;
         }
         if (kstate.IsKeyDown(Keys.Left))
         {
@@ -150,6 +155,10 @@ public class Player : IGameEntity
         {
             player.max_walk_speed = 250;
         }
+        if (kstate.IsKeyDown(Keys.D))
+        {
+            Health++;
+        }
     }
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D)
@@ -157,8 +166,20 @@ public class Player : IGameEntity
         if (Pos_X > 10 * 40 && Pos_X < 213 * 40 - 400)
             Camera2D.X = Pos_X - 400;
         if (Pos_Y > 601)
-            Camera2D.Y = 680;
-
+            Camera2D.Y = 720;
+        else 
+            Camera2D.Y = 0;
+        if (Pos_X > 57 * Width && Pos_X < 60 * Width && Collision[0] && Player_state == State.Crouching)
+        {
+            Pos_Y = 20 * Width;
+            Pos_X = 151 * Width;
+        }
+        if (Pos_X > 161 * Width && Pos_X < 162 * Width && Pos_Y > 29 * Width && walk_speed > 20)
+        {
+            Pos_Y = 9 * Width;
+            Pos_X = 164.5f * Width;
+        }
+        
         if (Hurt == true && Hurt_cooldown <= 0)
         {
             Hurt = false;
@@ -248,7 +269,7 @@ public class Player : IGameEntity
         this.Texture,
         new Vector2(Pos_X, Pos_Y),
         SourceRect[Anim_current],
-        (i_frames ? Color.PaleVioletRed : Color.White),
+        (Health == Health.Flower ? Color.LightSalmon : (i_frames ? Color.PaleVioletRed : Color.White)),
         0f,
         Camera2D + Ded_anim,
         new Vector2(1, 1),
@@ -298,7 +319,7 @@ public class Player : IGameEntity
             Player_state = State.Breaking;
         else if ((walk_speed > 60 || walk_speed < -20) && !(Collision[1] || Collision[2]))
             Player_state = State.Running;
-        else
+        else if (Player_state != State.Crouching)
             Player_state = State.Idle;
         //State.Running if might seem weird, but there was a bug where the animation would start constantly when running into a wall
     }
