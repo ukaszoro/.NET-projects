@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using System;
@@ -33,10 +34,13 @@ public class Goomba : IGameEntity
     Vector2 Dead_anim;
     Rectangle[] SourceRect;
     float X;
+    SoundEffect Sound;
 
     public Goomba(int x, int y, ref ContentManager Content)
     {
         Texture = Content.Load<Texture2D>("goomba");
+        Sound = Content.Load<SoundEffect>("stomp");
+        
         Type = "goomba";
         Collision = new bool[4];
         Pos_X = x * Tile.Size.X;
@@ -59,7 +63,7 @@ public class Goomba : IGameEntity
         Height = 40; Width = 40;
     }
     
-    public void Update(GameTime gameTime)
+    public void Update(GameTime gameTime, EntityManager e_manager)
     {
 
         float Elapsed_time = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -79,8 +83,10 @@ public class Goomba : IGameEntity
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D)
     {
+        if ((Hurt == true || Hurt_up == true) && Type == "goomba" && Anim_current != 2)
+            Sound.Play();
         if (Hurt_up == true)
-        {
+        {    
             Type = "ded";
             if (Anim_timer >= 10)
             {
@@ -157,10 +163,13 @@ public class Koopa : IGameEntity
     Vector2 Dead_anim;
     Rectangle[] SourceRect;
     bool spawned;
+    SoundEffect Sound;
+    float X;
 
     public Koopa(int x, int y, ref ContentManager Content)
     {
         Texture = Content.Load<Texture2D>("koopa");
+        Sound = Content.Load<SoundEffect>("stomp");
         Type = "koopa";
         Collision = new bool[4];
         Pos_X = x * Tile.Size.X;
@@ -182,7 +191,7 @@ public class Koopa : IGameEntity
         Height = 40; Width = 40;
     }
     
-    public void Update(GameTime gameTime)
+    public void Update(GameTime gameTime, EntityManager e_manager)
     {
 
         float Elapsed_time = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -202,6 +211,23 @@ public class Koopa : IGameEntity
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D)
     {
+        if ((Hurt == true || Hurt_up == true) && (Type == "koopa" || Type == "koopa_shell"))
+            Sound.Play();
+
+        if (Hurt_up == true)
+        {    
+            Type = "ded";
+            if (Anim_timer >= 10)
+            {
+                Dead_anim.Y = (0.01f * -X * X + X);
+                X += 4;
+            }
+            else
+                Anim_timer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+
+            if (X > 300)
+                remove = true;
+        }
         if (Hurt == true && Type == "koopa")
         {
             Type = "koopa_shell";
@@ -247,7 +273,7 @@ public class Koopa : IGameEntity
         0f,
         Camera2D + new Vector2(0, 20) + Dead_anim,
         new Vector2(1, 1),
-        (rotation == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally),
+        (Hurt_up ? SpriteEffects.FlipVertically : (rotation == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally)),
         0f
         );
     }

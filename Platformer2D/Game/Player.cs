@@ -48,7 +48,7 @@ public class Player : IGameEntity
     float Anim_timer;
     float Anim_threshold;
     int Anim_current;
-    float rotation;
+    int rotation;
     Vector2 Ded_anim; float x; // Both for displaying a nice game over animation
     bool Lock;
 
@@ -60,13 +60,18 @@ public class Player : IGameEntity
     bool i_frames;
     public bool remove { get; set; }
 
+    float Attack_cooldown;
+    ContentManager _Content;
+
     public Player(int x, int y, ref ContentManager Content, int lives)
     {
+        _Content = Content;
         Texture = Content.Load<Texture2D>("player");
         Type = "player";
-        Sound = new SoundEffect[2];
+        Sound = new SoundEffect[3];
         Sound[0] = Content.Load<SoundEffect>("jump");
         Sound[1] = Content.Load<SoundEffect>("mario_die");
+        Sound[2] = Content.Load<SoundEffect>("pipe_travel");
         
         Collision = new bool[4];
         Pos_X = x * Tile.Size.X;
@@ -75,6 +80,7 @@ public class Player : IGameEntity
         max_jump = 700f;
         gravity_accel = 0f;
         _world_gravity = 10f;
+        Attack_cooldown = 0;
 
         SourceRect = new Rectangle[14];
         SourceRect[0] = new(0, 0, 40, 40); //small Idle
@@ -102,7 +108,7 @@ public class Player : IGameEntity
         Player_lifes = lives;
     }
 
-    public void HandleInput(Player player)
+    public void HandleInput(Player player, EntityManager e_manager)
     {
         var kstate = Keyboard.GetState();
 
@@ -155,9 +161,15 @@ public class Player : IGameEntity
         {
             player.max_walk_speed = 250;
         }
+        if (kstate.IsKeyDown(Keys.X) && Health == Health.Flower && Attack_cooldown <= 0)
+        {
+            Attack_cooldown = 1.1f;
+            Fireball fireball = new(new Vector2(Pos_X + 20, Pos_Y + 30), _Content, rotation);
+            e_manager.AddEntity(fireball);
+        }
         if (kstate.IsKeyDown(Keys.D))
         {
-            Health++;
+            Health = Health.Flower;
         }
     }
 
@@ -171,11 +183,13 @@ public class Player : IGameEntity
             Camera2D.Y = 0;
         if (Pos_X > 57 * Width && Pos_X < 60 * Width && Collision[0] && Player_state == State.Crouching)
         {
+            Sound[2].Play();
             Pos_Y = 20 * Width;
             Pos_X = 151 * Width;
         }
         if (Pos_X > 161 * Width && Pos_X < 162 * Width && Pos_Y > 29 * Width && walk_speed > 20)
         {
+            Sound[2].Play();
             Pos_Y = 9 * Width;
             Pos_X = 164.5f * Width;
         }
@@ -185,7 +199,6 @@ public class Player : IGameEntity
             Hurt = false;
             Hurt_cooldown = 1500;
             Health--;
-            Console.Write(Health);
         }
         else if (Hurt_cooldown >= 0)
         {
@@ -278,13 +291,13 @@ public class Player : IGameEntity
         );
 
     }
-    public void Update(GameTime gameTime)
+    public void Update(GameTime gameTime, EntityManager e_manager)
     {
-        if (Health != Health.Dead)
-            HandleInput(this);
-
-
         float Elapsed_time = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        Attack_cooldown -= Elapsed_time;
+        
+        if (Health != Health.Dead)
+            HandleInput(this,e_manager);
 
         if (walk_speed > max_walk_speed)
             walk_speed -= 0.5f * Math.Abs(max_walk_speed - walk_speed);

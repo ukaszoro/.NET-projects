@@ -25,7 +25,7 @@ public interface IGameEntity
     float gravity_accel { get; set; }
     bool remove { get; set; }
     Health Health { get; set; }
-    void Update(GameTime gameTime);
+    void Update(GameTime gameTime, EntityManager e_manager);
     void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D);
 }
 
@@ -61,12 +61,12 @@ public class EntityManager
     public void Update(GameTime gameTime, Level Level)
     {
         foreach (IGameEntity entity in _entities.OrderBy(e => e.UpdateOrder))
-            entity.Update(gameTime);
+            entity.Update(gameTime, this);
         foreach (IGameEntity entity in _entities.OrderBy(e => e.UpdateOrder))
         {
             if (entity.remove == true)
             {
-                if (entity.Type != "coin")
+                if (entity.Type != "coin" && entity.Type != "fireball")
                     Level.Score += 100;
                 RemoveEntity(entity); 
             }
@@ -116,12 +116,11 @@ public class CollisionManager
                         Vector2 absDepth = new(Math.Abs(depth.X), Math.Abs(depth.Y));
                         if (absDepth.Y < absDepth.X)
                         {
-
                             if (depth.Y > 0)
                             {
                                 entity1.Collision[3] = true;
                                 entity1.Pos_Y = Tile.Bottom;
-                                if (Tiles[x,y]._collision == TileCollision.Breakable || Tiles[x,y]._collision == TileCollision.Mysteryblock)
+                                if (Tiles[x,y]._collision == TileCollision.Breakable || Tiles[x,y]._collision == TileCollision.Mysteryblock && entity1.Type != "fireball")
                                 {
                                     Tiles[x,y].Hit = true;
                                     if (entity1.Height == 80)
@@ -203,6 +202,16 @@ public class CollisionManager
                 else if (depth != Vector2.Zero && entity2.Type == "coin" && entity1.Type == "player")
                 {
                     continue; //if they both give a coin, you get both so one of them does nothing 
+                }
+                if (depth != Vector2.Zero && (entity1.Type == "fireball" || entity2.Type == "fireball"))
+                {
+                    if (entity1.Type == "player" || entity2.Type == "player")
+                        continue;
+                    if (entity1.Type == "fireball" && entity2.Type == "fireball")
+                        continue;
+                    entity2.Hurt_up = true;
+                    entity1.Hurt_up = true;
+                    continue;
                 }
 
                 if (absDepth.Y < absDepth.X)

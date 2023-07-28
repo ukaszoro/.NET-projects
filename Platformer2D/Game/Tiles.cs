@@ -201,14 +201,13 @@ public class Level
     public Level(Stream fileStream, int LevelIndex, ContentManager content, int lives)
     {
         Content = content;
-        TimeRemaining = 120;
+        TimeRemaining = 160;
         coins = 0;
         Lives = lives;
         LoadMapFile(fileStream);
         Hud = new(this, Content);
         song = content.Load<Song>("theme");
         MediaPlayer.Play(song);
-        MediaPlayer.IsRepeating = true;
         MediaPlayer.Volume = 0.1f;
         SoundEffect.MasterVolume = 0.2f;
     }
@@ -357,13 +356,14 @@ public class Level
     }
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
+        spriteBatch.Draw(Content.Load<Texture2D>("scenary"),-Camera2D,Color.White);
+        e_manager.Draw(spriteBatch, gameTime, ref Camera2D);
         for (int i = 0; i < Width; i++)
             for (int j = 0; j < Height; j++)
             {
                 if (!(tiles[i, j] == null))
                     tiles[i, j].Draw(spriteBatch, i, j, Camera2D, gameTime, this);
             }
-        e_manager.Draw(spriteBatch, gameTime, ref Camera2D);
         Hud.Draw(spriteBatch, gameTime);
     }
 }

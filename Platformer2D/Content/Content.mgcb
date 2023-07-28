@@ -103,6 +103,18 @@
 /processorParam:Quality=Best
 /build:coin.wav;coin_sound.wav
 
+#begin fireball.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:fireball.png
+
 #begin flower.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -218,6 +230,12 @@
 /processorParam:TextureFormat=Color
 /build:pipe_part.png
 
+#begin pipe_travel.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:pipe_travel.wav
+
 #begin player.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -229,6 +247,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:player.png
+
+#begin powerup_appear.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:powerup_appear.wav
+
+#begin powerup_take.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:powerup_take.wav
 
 #begin scenary.png
 /importer:TextureImporter
@@ -265,6 +295,12 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:stair.png
+
+#begin stomp.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:stomp.wav
 
 #begin theme.mp3
 /importer:Mp3Importer
