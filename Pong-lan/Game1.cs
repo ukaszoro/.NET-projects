@@ -12,6 +12,10 @@ public class Game1 : Game
     private SpriteBatch _spriteBatch;
     private EntityManager E_manager;
     public CollisionManager C_manager;
+    SpriteFont font;
+    StringBuilder S_builder = new StringBuilder();
+    int text_cooldown;
+    bool ip_input;
 
     StringBuilder myTextBoxDisplayCharacters = new StringBuilder();
 
@@ -52,38 +56,64 @@ public class Game1 : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
         // TODO: Add your update logic here
+        if (ip_input == false)
+            Read_textbox();
+        else
+        {
         E_manager.Update(gameTime);
         C_manager.check_collision();
+        }
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(new Color(0,0,0));
+        GraphicsDevice.Clear(new Color(0, 0, 0));
         _spriteBatch.Begin();
-        // Read_textbox();
-        // TODO: Add your drawing code here
-        E_manager.Draw(gameTime, _spriteBatch);
+
+        if (ip_input == false)
+        {
+            font = Content.Load<SpriteFont>("font");
+            _spriteBatch.DrawString(font, "Enter Lan ip and confirm with enter", new Vector2((Window.ClientBounds.Width / 2 - 393), (Window.ClientBounds.Height / 2 - 40)), Color.Lime);
+            _spriteBatch.DrawString(font, S_builder.ToString(), new Vector2((Window.ClientBounds.Width / 2 - 200), Window.ClientBounds.Height / 2), Color.Lime);
+        }
+        else
+            E_manager.Draw(gameTime, _spriteBatch);
+
         _spriteBatch.End();
         base.Draw(gameTime);
     }
 
     protected void Read_textbox()
     {
-        SpriteFont font = Content.Load<SpriteFont>("font");
-        StringBuilder S_builder = new StringBuilder();
-        KeyboardState state;
-        for (;;)
+        text_cooldown++;
+        if (text_cooldown > 4)
         {
+            text_cooldown = 0;
+            KeyboardState state;
             state = Keyboard.GetState();
-            foreach(var key in state.GetPressedKeys())
+            foreach (var key in state.GetPressedKeys())
             {
-                S_builder.Append(key);
+                if (key == Keys.Back)
+                {
+                    if (S_builder.Length != 0)
+                    {
+                        int start = S_builder.Length - 1;
+                        S_builder.Remove(start, 1);
+                    }
+                    continue;
+                }
+                if (key == Keys.Enter)
+                {
+                    ip_input = true;
+                }
+                if (S_builder.Length > 18)
+                    continue;
+                if ((int)key > 47 && (int)key < 58)
+                    S_builder.Append((char)key);
+                if (key == Keys.OemPeriod)
+                    S_builder.Append('.');
             }
-            _spriteBatch.Begin();
-            _spriteBatch.DrawString(font, S_builder.ToString(), new Vector2((Window.ClientBounds.Width / 3), Window.ClientBounds.Height / 2), Color.White);
-            _spriteBatch.End();
-            // Console.WriteLine(S_builder.ToString());
         }
     }
 }
