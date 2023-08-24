@@ -2,8 +2,10 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Text;
-
+using System.Threading;
+using System.Threading.Tasks;
+using System.Text; 
+    
 namespace Pong_lan;
 
 public class Game1 : Game
@@ -106,6 +108,7 @@ public class Game1 : Game
                 if (key == Keys.Enter)
                 {
                     ip_input = true;
+                    Connection();
                 }
                 if (S_builder.Length > 18)
                     continue;
@@ -114,6 +117,25 @@ public class Game1 : Game
                 if (key == Keys.OemPeriod)
                     S_builder.Append('.');
             }
+        }
+    }
+    private void Connection()
+    {
+        int port = 12345;
+        Server server = new Server(port);
+
+        // Start the server in the main thread
+        Task.Run(() => server.Start());
+
+        // Wait a little to ensure the server has started
+        Thread.Sleep(1000);
+
+        if (server.IsHost == false)
+        {
+        // Connect the client to the server in a separate thread
+        string serverIpAddress = "127.0.0.1"; // Replace with the server's IP address
+        Client client = new Client();
+        Task.Run(() => client.Connect(serverIpAddress, port));   
         }
     }
 }
