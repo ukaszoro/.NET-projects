@@ -133,7 +133,8 @@ public class Game1 : Game
         Task.Run(() => server.Start());
 
         // Wait a little to ensure the server has started
-        Thread.Sleep(1000);
+        
+        Thread.Sleep(100);
 
         string IPPAdress = S_builder.ToString();
         string[] Adress = IPPAdress.Split(':');
@@ -144,7 +145,14 @@ public class Game1 : Game
             Console.WriteLine($"Error: IpAdress in wrong format. Try XXX.XXX.XXX.XXX:XXXXX");
             Exit();
         }
-        client = new Client();
-        Task.Run(() => client.Connect(Adress[0], Convert.ToInt32(Adress[1]))); //TODO: change port to the user entered one   
+
+            client = new Client();
+            Task.Run(() => client.Connect(Adress[0], Convert.ToInt32(Adress[1])));
+        while (!client.Connected)
+        {
+            client = new Client();
+            Task.Run(() => client.Connect(Adress[0], Convert.ToInt32(Adress[1])));
+
+        }
     }
 }

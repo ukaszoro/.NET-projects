@@ -39,19 +39,12 @@ public class Server
             client = listener.AcceptTcpClient();
             Console.WriteLine("Client connected.");
 
-            // // Handle communication with the client here
-            // HandleClient(client);
+            NetworkStream stream = client.GetStream();
+            byte[] data = Encoding.ASCII.GetBytes("start");
+            stream.Write(data, 0, data.Length);
         }
     }
-    public void Send(string message)
-    {
-        if (client is null)
-            return;
-            
-        NetworkStream stream = client.GetStream();
-        byte[] data = Encoding.ASCII.GetBytes(message);
-        stream.Write(data, 0, data.Length);
-    }
+    
     public string Recieve()
     {
         if (client is null)
@@ -65,35 +58,19 @@ public class Server
         return recievedMessage;
     }
 
-    private void HandleClient()
-    {
-        NetworkStream stream = client.GetStream();
-
-        // Example: Sending a message to the client
-        string message = "Hello from server!";
-        byte[] data = Encoding.ASCII.GetBytes(message);
-        stream.Write(data, 0, data.Length);
-
-        // Example: Receiving a message from the client
-        byte[] buffer = new byte[1024];
-        int bytesRead = stream.Read(buffer, 0, buffer.Length);
-        string receivedMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-        Console.WriteLine("Received from client: " + receivedMessage);
-
-        // Close the client connection
-        client.Close();
-    }
 }
 
 public class Client
 {
     private TcpClient client;
+    public bool Connected {get; set;}
     
     public void Connect(string ipAddress, int port)
     {
         client = new TcpClient();
         client.Connect(ipAddress, port);
 
+        Connected = client.Connected; 
         // NetworkStream stream = client.GetStream();
 
         // // Example: Receiving a message from the server
