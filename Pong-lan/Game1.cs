@@ -20,6 +20,10 @@ public class Game1 : Game
     bool ip_input;
 
     StringBuilder myTextBoxDisplayCharacters = new StringBuilder();
+    int server_port = Portfinder.GetAvaliablePort();
+
+    Server server;
+    Client client;
 
     public Game1()
     {
@@ -110,19 +114,20 @@ public class Game1 : Game
                     ip_input = true;
                     Connection();
                 }
-                if (S_builder.Length > 18)
+                if (S_builder.Length > 22)
                     continue;
                 if ((int)key > 47 && (int)key < 58)
                     S_builder.Append((char)key);
                 if (key == Keys.OemPeriod)
                     S_builder.Append('.');
+                if (key == Keys.OemSemicolon)
+                    S_builder.Append(':');
             }
         }
     }
     private void Connection()
     {
-        int port = 12345;
-        Server server = new Server(port);
+        server = new Server(server_port);
 
         // Start the server in the main thread
         Task.Run(() => server.Start());
@@ -130,12 +135,16 @@ public class Game1 : Game
         // Wait a little to ensure the server has started
         Thread.Sleep(1000);
 
-        if (server.IsHost == false)
-        {
+        string IPPAdress = S_builder.ToString();
+        string[] Adress = IPPAdress.Split(':');
+        string[] Adress_check = IPPAdress.Split('.');
         // Connect the client to the server in a separate thread
-        string serverIpAddress = "127.0.0.1"; // Replace with the server's IP address
-        Client client = new Client();
-        Task.Run(() => client.Connect(serverIpAddress, port));   
+        if (Adress.Length < 2 || Adress_check.Length < 4)
+        {
+            Console.WriteLine($"Error: IpAdress in wrong format. Try XXX.XXX.XXX.XXX:XXXXX");
+            Exit();
         }
+        client = new Client();
+        Task.Run(() => client.Connect(Adress[0], Convert.ToInt32(Adress[1]))); //TODO: change port to the user entered one   
     }
 }

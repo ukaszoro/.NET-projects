@@ -5,22 +5,34 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+public class Portfinder
+{
+    public static int GetAvaliablePort()
+    {
+        TcpListener tmp = new TcpListener(IPAddress.Any, 0);
+        tmp.Start();
+        int port = ((IPEndPoint)tmp.LocalEndpoint).Port;
+        tmp.Stop();
+        Console.WriteLine($"Available port found: {port}");
+        return port;
+    }
+}
 public class Server
 {
     private TcpListener listener;
     private TcpClient client;
-    public bool IsHost = false;
+
+    public int port {get; set;}
     
     public Server(int port)
     {
         listener = new TcpListener(IPAddress.Any, port);
     }
 
-    public void Start()
+        public void Start()
     {
         listener.Start();
-        Console.WriteLine("Server started. Waiting for clients...");
-        IsHost = true;
+        Console.WriteLine("Server started on port {0}. Waiting for clients...", ((IPEndPoint)listener.LocalEndpoint).Port);
         
         while (client is null)
         {
