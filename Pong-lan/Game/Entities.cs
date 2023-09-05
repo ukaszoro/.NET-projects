@@ -16,9 +16,14 @@ public class Player : IGameEntity
     // int Hight;
     // int Width;
     int Player_number;
+    Server Server;
+    Client Client;
+
     
-    public Player(GraphicsDeviceManager graphics, GameWindow window, int player)
+    public Player(GraphicsDeviceManager graphics, GameWindow window, int player, Server server, Client client)
     { 
+        Server = server;
+        Client = client;
         Type = "player";
         Window = window;
         Texture = new Texture2D(graphics.GraphicsDevice,1,1);
@@ -26,28 +31,52 @@ public class Player : IGameEntity
         Hight = graphics.PreferredBackBufferHeight / 5;
         Width = Hight / 10;
         Player_number = player;
+    
     }
     public void HandleInput(float elapsed_time)
     {
-        var kstate = Keyboard.GetState();
+        if (Player_number == 1)
+        {
+            var kstate = Keyboard.GetState();
 
-        if (kstate.IsKeyDown(Keys.Up))
-        {
-            Horizontal_speed = -Window.ClientBounds.Height / 1.2f * elapsed_time;
+            if (kstate.IsKeyDown(Keys.Up))
+            {
+                // Client.Send(Keys.Up.ToString());
+                Horizontal_speed = -Window.ClientBounds.Height / 1.2f * elapsed_time;
+            }
+            if (kstate.IsKeyDown(Keys.Down))
+            {
+                // Client.Send(Keys.Down.ToString());
+                Horizontal_speed = Window.ClientBounds.Height / 1.2f * elapsed_time;
+            }
+            if (kstate.IsKeyUp(Keys.Up) && kstate.IsKeyUp(Keys.Down))
+            {
+                // Client.Send("None");
+                if (Horizontal_speed > 10)
+                    Horizontal_speed -= Math.Abs(0.1f * Horizontal_speed) + 20;
+                else if (Horizontal_speed < -10)
+                    Horizontal_speed += Math.Abs(0.1f * Horizontal_speed) + 20;
+                else
+                    Horizontal_speed = 0;
+            }
         }
-        if (kstate.IsKeyDown(Keys.Down))
-        {
-            Horizontal_speed = Window.ClientBounds.Height / 1.2f * elapsed_time;
-        }
-        if (kstate.IsKeyUp(Keys.Up) && kstate.IsKeyUp(Keys.Down))
-        {
-            if (Horizontal_speed > 10)
-                Horizontal_speed -= Math.Abs(0.1f * Horizontal_speed) + 20;
-            else if (Horizontal_speed < -10)
-                Horizontal_speed += Math.Abs(0.1f * Horizontal_speed) + 20;
-            else
-                Horizontal_speed = 0;
-        }
+    //     else
+    //     {
+    //         string Input = Server.Recieve();
+    //         if (Input == "Up")
+    //             Horizontal_speed = -Window.ClientBounds.Height / 1.2f * elapsed_time;
+    //         if (Input == "Down")
+    //             Horizontal_speed = Window.ClientBounds.Height / 1.2f * elapsed_time;
+    //         if (Input == "None")
+    //         {
+    //             if (Horizontal_speed > 10)
+    //                 Horizontal_speed -= Math.Abs(0.1f * Horizontal_speed) + 20;
+    //             else if (Horizontal_speed < -10)
+    //                 Horizontal_speed += Math.Abs(0.1f * Horizontal_speed) + 20;
+    //             else
+    //                 Horizontal_speed = 0;
+    //         }
+    //     }
     }
     public override void Update(GameTime gameTime)
     {

@@ -40,9 +40,9 @@ public class Game1 : Game
         C_manager = new(E_manager._entities);
         
         
-        Player player = new(_graphics,Window ,1);
+        Player player = new(_graphics,Window ,1, server, client);
         E_manager.AddEntity(player);
-        player = new(_graphics,Window,2);
+        player = new(_graphics,Window,2, server, client);
         E_manager.AddEntity(player);
         Ball ball = new(_graphics, Window);
         E_manager.AddEntity(ball);
@@ -132,9 +132,6 @@ public class Game1 : Game
         // Start the server in the main thread
         Task.Run(() => server.Start());
 
-        // Wait a little to ensure the server has started
-        
-        Thread.Sleep(100);
 
         string IPPAdress = S_builder.ToString();
         string[] Adress = IPPAdress.Split(':');
@@ -146,13 +143,18 @@ public class Game1 : Game
             Exit();
         }
 
-            client = new Client();
-            Task.Run(() => client.Connect(Adress[0], Convert.ToInt32(Adress[1])));
+        client = new Client();
+        Task.Run(() => client.Connect(Adress[0], Convert.ToInt32(Adress[1])));
         while (!client.Connected)
         {
             client = new Client();
             Task.Run(() => client.Connect(Adress[0], Convert.ToInt32(Adress[1])));
 
         }
+        Thread.Sleep(1000);
+        client.Send("Yo");
+        Console.WriteLine(server.Recieve());
+        Thread.Sleep(1000);
+        this.Initialize();
     }
 }

@@ -71,21 +71,6 @@ public class Client
         client.Connect(ipAddress, port);
 
         Connected = client.Connected; 
-        // NetworkStream stream = client.GetStream();
-
-        // // Example: Receiving a message from the server
-        // byte[] buffer = new byte[1024];
-        // int bytesRead = stream.Read(buffer, 0, buffer.Length);
-        // string receivedMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-        // Console.WriteLine("Received from server: " + receivedMessage);
-
-        // // Example: Sending a message to the server
-        // string message = "Hello from client!";
-        // byte[] data = Encoding.ASCII.GetBytes(message);
-        // stream.Write(data, 0, data.Length);
-
-        // // Close the client connection
-        // client.Close();
     }
     public void Send(string message)
     {
@@ -96,41 +81,5 @@ public class Client
         byte[] data = Encoding.ASCII.GetBytes(message);
         stream.Write(data, 0, data.Length);
     }
-    public string Recieve()
-    {
-        if (client is null)
-            return null;
-            
-        NetworkStream stream = client.GetStream();
-    
-        byte[] buffer = new byte[1024];
-        int bytesRead = stream.Read(buffer, 0, buffer.Length);
-        string recievedMessage = Encoding.ASCII.GetString(buffer, 0 , bytesRead);
-        return recievedMessage;
-    }
     
 }
-
-// class Program
-// {
-//     static void Main(string[] args)
-//     {
-//         int port = 12345;
-//         Server server = new Server(port);
-
-//         // Start the server in the main thread
-//         Task.Run(() => server.Start());
-
-//         // Wait a little to ensure the server has started
-//         Thread.Sleep(1000);
-
-//         // Connect the client to the server in a separate thread
-//         string serverIpAddress = "127.0.0.1"; // Replace with the server's IP address
-//         Client client = new Client();
-//         Task.Run(() => client.Connect(serverIpAddress, port));
-
-//         // Wait for a key press to exit the program
-//         Console.WriteLine("Press any key to exit...");
-//         Console.ReadKey();
-//     }
-// }
