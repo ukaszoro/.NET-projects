@@ -35,17 +35,21 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
-        E_manager = new();
-        C_manager = new(E_manager._entities);
-        
-        
-        Player player = new(_graphics,Window ,1, server, client);
-        E_manager.AddEntity(player);
-        player = new(_graphics,Window,2, server, client);
-        E_manager.AddEntity(player);
-        Ball ball = new(_graphics, Window);
-        E_manager.AddEntity(ball);
+        if (client != null)
+        {
+            // TODO: Add your initialization logic here
+            E_manager = new();
+            C_manager = new(E_manager._entities);
+
+
+            Player player = new(_graphics, Window, 1, server, client);
+            E_manager.AddEntity(player);
+            player = new(_graphics, Window, 2, server, client);
+            E_manager.AddEntity(player);
+            Ball ball = new(_graphics, Window);
+            E_manager.AddEntity(ball);
+
+        }
 
         base.Initialize();
     }
@@ -144,17 +148,19 @@ public class Game1 : Game
         }
 
         client = new Client();
-        Task.Run(() => client.Connect(Adress[0], Convert.ToInt32(Adress[1])));
         while (!client.Connected)
         {
-            client = new Client();
-            Task.Run(() => client.Connect(Adress[0], Convert.ToInt32(Adress[1])));
-
+            try
+            {
+                client.Connect(Adress[0], Convert.ToInt32(Adress[1]));
+            }
+            catch { }
+            System.Threading.Thread.Sleep(500);
         }
         Thread.Sleep(1000);
         client.Send("Yo");
         Console.WriteLine(server.Recieve());
         Thread.Sleep(1000);
-        this.Initialize();
+        Initialize();
     }
 }
