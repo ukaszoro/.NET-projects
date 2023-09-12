@@ -4,8 +4,8 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Text; 
-    
+using System.Text;
+
 namespace Pong_lan;
 
 public class Game1 : Game
@@ -18,6 +18,8 @@ public class Game1 : Game
     StringBuilder S_builder = new StringBuilder();
     int text_cooldown;
     bool ip_input;
+    int ball_seed;
+    bool flip;
 
     StringBuilder myTextBoxDisplayCharacters = new StringBuilder();
     int server_port = Portfinder.GetAvaliablePort();
@@ -46,7 +48,7 @@ public class Game1 : Game
             E_manager.AddEntity(player);
             player = new(_graphics, Window, 2, server, client);
             E_manager.AddEntity(player);
-            Ball ball = new(_graphics, Window);
+            Ball ball = new(_graphics, Window, ball_seed, flip);
             E_manager.AddEntity(ball);
 
         }
@@ -57,7 +59,7 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        
+
         // TODO: use this.Content to load your game content here
     }
 
@@ -70,8 +72,8 @@ public class Game1 : Game
             Read_textbox();
         else
         {
-        E_manager.Update(gameTime);
-        C_manager.check_collision();
+            E_manager.Update(gameTime);
+            C_manager.check_collision();
         }
         base.Update(gameTime);
     }
@@ -158,8 +160,18 @@ public class Game1 : Game
             System.Threading.Thread.Sleep(500);
         }
         Thread.Sleep(1000);
-        client.Send("Yo");
-        Console.WriteLine(server.Recieve());
+        var rand = new Random();
+        int numba = rand.Next(Int32.MaxValue / 4);
+        client.Send(Convert.ToString(numba));
+        int other_numba = Convert.ToInt32(server.Recieve());
+        if (numba == other_numba)
+            if (rand.Next(101) > 50)
+                numba++;
+        if (numba < other_numba)
+            flip = true;
+
+        ball_seed = numba + other_numba;
+        Console.WriteLine("Seed for ball start is {0}", ball_seed);
         Thread.Sleep(1000);
         Initialize();
     }

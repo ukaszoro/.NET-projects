@@ -82,7 +82,7 @@ public class CollisionManager
                     continue;
                 entity1.Horizontal_speed = -entity1.Horizontal_speed * 1.05f;
                 Random rnd = new();
-                entity1.Vertical_speed += ((rnd.NextSingle() - 0.5f) / 10) * entity1.Vertical_speed;
+                entity1.Vertical_speed += 0.05f * entity1.Vertical_speed;
             }
         }
     }

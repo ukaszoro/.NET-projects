@@ -116,7 +116,7 @@ public class Player : IGameEntity
 public class Ball : IGameEntity
 {
     Random rand = new();
-    public Ball(GraphicsDeviceManager graphics, GameWindow window)
+    public Ball(GraphicsDeviceManager graphics, GameWindow window, int seed, bool flip)
     {
         Type = "ball";
         Window = window;
@@ -127,7 +127,7 @@ public class Ball : IGameEntity
         Pos.X = (float)(Window.ClientBounds.Width - Width) / 2;
         Pos.Y = (float)(Window.ClientBounds.Height - Hight) / 2;
         Window_bounds = Window.ClientBounds;
-        if (rand.Next(2) == 0)
+        if (seed % 2 == 0)
         {
             Horizontal_speed = -Window_bounds.Width / 5;
         }
@@ -135,7 +135,9 @@ public class Ball : IGameEntity
         {
             Horizontal_speed = Window_bounds.Width / 5;
         }
-        Vertical_speed = (rand.NextSingle() - 0.5f) * Window_bounds.Height;
+        Vertical_speed = ((float)(seed%101/100) - 0.5f) * Window_bounds.Height;
+        if (flip == true)
+            Horizontal_speed = -Horizontal_speed;
     }
     public override void Update(GameTime gameTime)
     {
