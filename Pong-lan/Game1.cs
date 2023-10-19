@@ -160,6 +160,10 @@ public class Game1 : Game
             System.Threading.Thread.Sleep(500);
         }
         Thread.Sleep(1000);
+        client.Send("YES?");
+        while (server.Recieve() != "YES?") {}
+        
+        Thread.Sleep(1000);
         var rand = new Random();
         int numba = rand.Next(Int32.MaxValue / 4);
         client.Send(Convert.ToString(numba));
