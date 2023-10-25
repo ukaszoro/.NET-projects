@@ -36,14 +36,14 @@ public static class Udp_listener
 
 public static class Udp_sender
 {
-    public static void Send()
+    public static void Send(string message, string ip4, int port)
     {
         Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
-        IPAddress broadcast = IPAddress.Parse("127.0.0.1");
+        IPAddress broadcast = IPAddress.Parse(ip4);
 
-        byte[] sendbuf = Encoding.ASCII.GetBytes("Cheese");
-        IPEndPoint ep = new IPEndPoint(broadcast, 11000);
+        byte[] sendbuf = Encoding.ASCII.GetBytes(message);
+        IPEndPoint ep = new IPEndPoint(broadcast, port);
 
         s.SendTo(sendbuf, ep);
 
