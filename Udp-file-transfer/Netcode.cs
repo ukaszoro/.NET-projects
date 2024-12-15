@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -7,7 +8,7 @@ public static class Udp_listener
 {
     private const int listenPort = 11000;
     
-    public static void StartListener()
+    public static void StartListener(string outputFile)
     {
         UdpClient listener = new UdpClient(listenPort);
         IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, listenPort);
@@ -20,7 +21,8 @@ public static class Udp_listener
                 byte[] bytes = listener.Receive(ref groupEP);
 
                 Console.WriteLine($"Recieved broadcast from {groupEP} :");
-                Console.WriteLine($" {Encoding.ASCII.GetString(bytes, 0 ,bytes.Length)}");
+                Console.WriteLine($"{Encoding.ASCII.GetString(bytes, 0 ,bytes.Length)}");
+                File.WriteAllText(outputFile,Encoding.ASCII.GetString(bytes, 0 ,bytes.Length));
             }
         }
         catch (SocketException e)

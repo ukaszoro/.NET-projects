@@ -32,8 +32,11 @@ namespace Udp_file_transfer
                     break;
                     
                 case "listen":
-                    Udp_listener.StartListener();
-                    break;
+                	if (args.Length <= 1)
+                            goto Error_close;
+                            
+                        Udp_listener.StartListener(args[1]);
+                	break;
                     
                 default:
                     goto Error_close;
