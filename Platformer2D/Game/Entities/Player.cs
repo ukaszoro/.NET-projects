@@ -2,25 +2,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Content;
 using System;
 
 namespace Platformer2D;
-public enum Health
-{
-    Dead = 0,
-    Small = 1,
-    Big = 2,
-    Flower = 3,
-}
-public enum State
-{
-    Idle = 0,
-    Running = 1,
-    InAir = 2,
-    Breaking = 3,
-    Crouching = 4,
-}
+
 public class Player : IGameEntity
 {
     public string Type { get; }
@@ -43,13 +28,14 @@ public class Player : IGameEntity
     public SoundEffect[] Sound;
 
     public Texture2D Texture { get; }
-    State Player_state;    // variables for animations
+    State Player_state; // variables for animations
     Rectangle[] SourceRect;
     float Anim_timer;
     float Anim_threshold;
     int Anim_current;
     int rotation;
-    Vector2 Ded_anim; float x; // Both for displaying a nice game over animation
+    Vector2 Ded_anim;
+    float x; // Both for displaying a nice game over animation
     bool Lock;
 
     public Health Health { get; set; }
@@ -61,21 +47,21 @@ public class Player : IGameEntity
     public bool remove { get; set; }
 
     float Attack_cooldown;
-    ContentManager _Content;
+    EntityFactory factory = EntityFactory.Instance;
 
-    public Player(int x, int y, ref ContentManager Content, int lives)
+    public Player(int x, int y, Texture2D texture, SoundEffect sound_jump, SoundEffect sound_death,
+        SoundEffect sound_pipe, int lives)
     {
-        _Content = Content;
-        Texture = Content.Load<Texture2D>("player");
+        Texture = texture;
         Type = "player";
         Sound = new SoundEffect[3];
-        Sound[0] = Content.Load<SoundEffect>("jump");
-        Sound[1] = Content.Load<SoundEffect>("mario_die");
-        Sound[2] = Content.Load<SoundEffect>("pipe_travel");
-        
+        Sound[0] = sound_jump;
+        Sound[1] = sound_death;
+        Sound[2] = sound_pipe;
+
         Collision = new bool[4];
-        Pos_X = x * Tile.Size.X;
-        Pos_Y = y * Tile.Size.Y;
+        Pos_X = x * ITile.TSize.X;
+        Pos_Y = y * ITile.TSize.Y;
         jump_speed = 0f;
         max_jump = 700f;
         gravity_accel = 0f;
@@ -95,8 +81,8 @@ public class Player : IGameEntity
         SourceRect[9] = new(80, 40, 40, 80); //big Running2
         SourceRect[10] = new(120, 40, 40, 80); //big Running3
         SourceRect[11] = new(160, 40, 40, 80); //big Jumping
-        SourceRect[12] = new(200, 40, 40, 80);//big Breaking
-        SourceRect[13] = new(240,40,1,1); // Empty for i-frames
+        SourceRect[12] = new(200, 40, 40, 80); //big Breaking
+        SourceRect[13] = new(240, 40, 1, 1); // Empty for i-frames
 
         Anim_threshold = 50;
         Ded_anim = new(0, 0);
@@ -104,7 +90,8 @@ public class Player : IGameEntity
         Hurt_cooldown = 0f;
 
         Health = Health.Small;
-        Height = 40; Width = 40;
+        Height = 40;
+        Width = 40;
         Player_lifes = lives;
     }
 
@@ -118,6 +105,7 @@ public class Player : IGameEntity
             player.Collision[0] = false;
             player.jump_speed = player.max_jump;
         }
+
         // if (kstate.IsKeyUp(Keys.Up) && player1.jump_speed < 0.4f * player1.max_jump && player1.jumped) {
         //     player1.jump_speed = 0.1f * player1.max_jump;
         //     player1.jumped = false;
@@ -130,20 +118,24 @@ public class Player : IGameEntity
         {
             Player_state = State.Idle;
         }
+
         if (kstate.IsKeyDown(Keys.Left))
         {
             player.walk_speed -= (Math.Abs(0.2f * player.walk_speed) + 15);
             walk_input = true;
         }
+
         if (kstate.IsKeyDown(Keys.Right))
         {
             player.walk_speed += Math.Abs(0.2f * player.walk_speed) + 15;
             walk_input = true;
         }
+
         if (walk_input == true && kstate.IsKeyUp(Keys.Left) && kstate.IsKeyUp(Keys.Right))
         {
             walk_input = false;
         }
+
         if (!kstate.IsKeyDown(Keys.Right) && !kstate.IsKeyDown(Keys.Left))
         {
             if (player.walk_speed > 10)
@@ -153,6 +145,7 @@ public class Player : IGameEntity
             if (player.walk_speed > -10 && player.walk_speed < 10)
                 player.walk_speed = 0;
         }
+
         if (kstate.IsKeyDown(Keys.Z))
         {
             player.max_walk_speed = 350;
@@ -161,12 +154,14 @@ public class Player : IGameEntity
         {
             player.max_walk_speed = 250;
         }
+
         if (kstate.IsKeyDown(Keys.X) && Health == Health.Flower && Attack_cooldown <= 0)
         {
             Attack_cooldown = 1.1f;
-            Fireball fireball = new(new Vector2(Pos_X + 20, Pos_Y + 30), _Content, rotation);
-            e_manager.AddEntity(fireball);
+            //Fireball fireball = new(new Vector2(Pos_X + 20, Pos_Y + 30), _Content, rotation);
+            e_manager.AddEntity(factory.CreateFireball(new Vector2(Pos_X + 20, Pos_Y + 30), rotation));
         }
+
         if (kstate.IsKeyDown(Keys.D))
         {
             Health = Health.Flower;
@@ -179,7 +174,7 @@ public class Player : IGameEntity
             Camera2D.X = Pos_X - 400;
         if (Pos_Y > 601)
             Camera2D.Y = 720;
-        else 
+        else
             Camera2D.Y = 0;
         if (Pos_X > 57 * Width && Pos_X < 60 * Width && Collision[0] && Player_state == State.Crouching)
         {
@@ -187,13 +182,14 @@ public class Player : IGameEntity
             Pos_Y = 20 * Width;
             Pos_X = 151 * Width;
         }
+
         if (Pos_X > 161 * Width && Pos_X < 162 * Width && Pos_Y > 29 * Width && walk_speed > 20)
         {
             Sound[2].Play();
             Pos_Y = 9 * Width;
             Pos_X = 164.5f * Width;
         }
-        
+
         if (Hurt == true && Hurt_cooldown <= 0)
         {
             Hurt = false;
@@ -205,6 +201,7 @@ public class Player : IGameEntity
             Hurt = false;
             Hurt_cooldown -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
         }
+
         Check_state();
         if (Player_state == State.Idle)
             Anim_current = 0;
@@ -219,6 +216,7 @@ public class Player : IGameEntity
             }
             else
                 Anim_timer += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+
             if (walk_speed < 0)
             {
                 rotation = 0;
@@ -226,6 +224,7 @@ public class Player : IGameEntity
             else
                 rotation = 1;
         }
+
         if (Player_state == State.InAir)
             Anim_current = 4;
         if (Player_state == State.Breaking)
@@ -236,8 +235,8 @@ public class Player : IGameEntity
                 Pos_Y -= 40;
             Anim_current += 7;
             Height = 80;
-
         }
+
         if (Anim_current < 7)
             Height = 40;
 
@@ -266,38 +265,39 @@ public class Player : IGameEntity
                 //check for more lifes and if there aren't any, do a game over and close?
                 if (Player_lifes < 0)
                 {
-
                 }
+
                 Player_lifes--;
             }
         }
+
         if (Hurt_cooldown > 0 && Health > Health.Dead)
         {
             i_frames = i_frames ^ true;
         }
         else
             i_frames = false;
-        
-        spriteBatch.Draw(
-        this.Texture,
-        new Vector2(Pos_X, Pos_Y),
-        SourceRect[Anim_current],
-        (Health == Health.Flower ? Color.LightSalmon : (i_frames ? Color.PaleVioletRed : Color.White)),
-        0f,
-        Camera2D + Ded_anim,
-        new Vector2(1, 1),
-        (rotation == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally),
-        0f
-        );
 
+        spriteBatch.Draw(
+            this.Texture,
+            new Vector2(Pos_X, Pos_Y),
+            SourceRect[Anim_current],
+            (Health == Health.Flower ? Color.LightSalmon : (i_frames ? Color.PaleVioletRed : Color.White)),
+            0f,
+            Camera2D + Ded_anim,
+            new Vector2(1, 1),
+            (rotation == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally),
+            0f
+        );
     }
+
     public void Update(GameTime gameTime, EntityManager e_manager)
     {
         float Elapsed_time = (float)gameTime.ElapsedGameTime.TotalSeconds;
         Attack_cooldown -= Elapsed_time;
-        
+
         if (Health != Health.Dead)
-            HandleInput(this,e_manager);
+            HandleInput(this, e_manager);
 
         if (walk_speed > max_walk_speed)
             walk_speed -= 0.5f * Math.Abs(max_walk_speed - walk_speed);
@@ -315,15 +315,18 @@ public class Player : IGameEntity
             if (gravity_accel > max_jump * 1.86f)
                 gravity_accel = max_jump * 1.86f;
         }
+
         if (Collision[0] || Collision[3])
         {
             gravity_accel = 0;
             jump_speed = 0;
         }
-        if (jump_speed > 0 && gravity_accel < 1.5*_world_gravity)
+
+        if (jump_speed > 0 && gravity_accel < 1.5 * _world_gravity)
             Sound[0].Play();
         Pos_Y -= (jump_speed - gravity_accel) * Elapsed_time;
     }
+
     void Check_state()
     {
         if (!Collision[0])

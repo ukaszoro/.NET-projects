@@ -7,7 +7,6 @@ namespace Platformer2D;
 
 public class Game1 : Game
 {
-    Player player;
     Level level;
     int Lives;
 
@@ -28,15 +27,16 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        Lives --;
+        Lives--;
         if (Lives >= 0)
-        level = new(File.Open("./Maps/Map0", FileMode.Open), 0, Content, Lives);
-        else 
+            level = new(File.Open("./Maps/Map0", FileMode.Open), 0, Content, Lives);
+        else
         {
             GraphicsDevice.Clear(Color.Black);
             Exit();
             // TODO:Game over, 
         }
+
         base.Initialize();
     }
 
@@ -44,21 +44,23 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
     }
+
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+            Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
         if (level.restart == true)
             Initialize();
-        
+
         level.Update(gameTime);
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(new Color(0,0,0));
+        GraphicsDevice.Clear(new Color(0, 0, 0));
 
         _spriteBatch.Begin();
         level.Draw(_spriteBatch, gameTime);

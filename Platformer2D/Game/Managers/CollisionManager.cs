@@ -1,97 +1,25 @@
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.Linq;
 using System;
 
 namespace Platformer2D;
 
-public interface IGameEntity
-{
-    string Type { get; }
-    bool[] Collision { get; }
-    int DrawOrder { get; }
-    int UpdateOrder { get; }
-    //Vector2 Pos { get; set; }
-    float Pos_X { get; set; }
-    float Pos_Y { get; set; }
-    float walk_speed { get; set; }
-    Texture2D Texture { get; }
-    int Height { get; set; }
-    int Width { get; set; }
-    bool Hurt { get; set; }
-    bool Hurt_up { get; set; }
-    float jump_speed { get; set; }
-    float gravity_accel { get; set; }
-    bool remove { get; set; }
-    Health Health { get; set; }
-    void Update(GameTime gameTime, EntityManager e_manager);
-    void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D);
-}
-
-public class EntityManager
-{
-    public readonly List<IGameEntity> _entities = new List<IGameEntity>();
-    public EntityManager() { }
-
-    public bool AddEntity(IGameEntity entity)
-    {
-        if (entity is null)
-            throw new ArgumentNullException(nameof(entity));
-        if (HasEntity(entity))
-            return false;
-        _entities.Add(entity);
-        return true;
-    }
-
-    public bool RemoveEntity(IGameEntity entity)
-    {
-        if (entity is null)
-            throw new ArgumentNullException(nameof(entity));
-        if (!HasEntity(entity))
-            return false;
-        _entities.Remove(entity);
-        return true;
-    }
-    public bool HasEntity(IGameEntity entity) 
-    {
-        if (_entities.Contains(entity)) return true;
-        else return false;
-    }
-    public void Update(GameTime gameTime, Level Level)
-    {
-        foreach (IGameEntity entity in _entities.OrderBy(e => e.UpdateOrder))
-            entity.Update(gameTime, this);
-        foreach (IGameEntity entity in _entities.OrderBy(e => e.UpdateOrder))
-        {
-            if (entity.remove == true)
-            {
-                if (entity.Type != "coin" && entity.Type != "fireball")
-                    Level.Score += 100;
-                RemoveEntity(entity); 
-            }
-        }
-
-    }
-    public void Draw(SpriteBatch spriteBatch, GameTime gameTime, ref Vector2 Camera2D)
-    {
-
-        foreach (IGameEntity entity in _entities.OrderBy(e => e.DrawOrder))
-            entity.Draw(spriteBatch, gameTime, ref Camera2D);
-    }
-}
 public class CollisionManager
 {
-    private readonly List<IGameEntity> _entities = new List<IGameEntity>();
+    private readonly List<IGameEntity> _entities;
+
     public CollisionManager(EntityManager e_manager)
     {
         _entities = e_manager._entities;
     }
-    public void check_collision(ref Tile[,] Tiles, Level level)
+
+    public void check_collision(ref ITile[,] Tiles, Level level)
     {
         foreach (IGameEntity entity1 in _entities.OrderBy(e => e.UpdateOrder))
         {
-            Rectangle entity1_rect = new((int)entity1.Pos_X, (int)entity1.Pos_Y, (int)entity1.Width, (int)entity1.Height);
+            Rectangle entity1_rect =
+                new((int)entity1.Pos_X, (int)entity1.Pos_Y, (int)entity1.Width, (int)entity1.Height);
             entity1.Collision[0] = false; // Collision[0] - collision with the ground
             entity1.Collision[1] = false;
             entity1.Collision[2] = false;
@@ -113,6 +41,7 @@ public class CollisionManager
                             entity1.Health = 0;
                             continue;
                         }
+
                         Vector2 absDepth = new(Math.Abs(depth.X), Math.Abs(depth.Y));
                         if (absDepth.Y < absDepth.X)
                         {
@@ -120,19 +49,33 @@ public class CollisionManager
                             {
                                 entity1.Collision[3] = true;
                                 entity1.Pos_Y = Tile.Bottom;
-                                if (Tiles[x,y]._collision == TileCollision.Breakable || Tiles[x,y]._collision == TileCollision.Mysteryblock && entity1.Type != "fireball")
+                                if (Tiles[x, y]._collision == TileCollision.Breakable ||
+                                    Tiles[x, y]._collision == TileCollision.Mysteryblock && entity1.Type == "player")
                                 {
-                                    Tiles[x,y].Hit = true;
+                                    Tiles[x, y].Hit = true;
                                     if (entity1.Height == 80)
-                                        if (Tiles[x,y]._collision == TileCollision.Breakable)
-                                            Tiles[x,y].Break = true;
+                                        if (Tiles[x, y]._collision == TileCollision.Breakable)
+                                            Tiles[x, y].Break = true;
+                                }
+
+                                if (Tiles[x, y]._collision == TileCollision.Mysteryblock && entity1.Type == "player")
+                                {
+                                    if (Tiles[x, y].Contains > 0)
+                                    {
+                                        level.coins++;
+                                    }
+
+                                    if (Tiles[x, y].Contains < 0)
+                                    {
+                                        level.Spawn_powerup(Tiles[x, y].Pos * Tiles[x, y].Size);
+                                    }
                                 }
                             }
                             else if (depth.Y < 0)
                             {
                                 entity1.Collision[0] = true;
                                 entity1.Pos_Y = Tile.Top - entity1.Height + 1;
-                                if (Tiles[x,y].Hit == true)
+                                if (Tiles[x, y].Hit == true)
                                     entity1.Hurt_up = true;
                             }
                         }
@@ -142,10 +85,13 @@ public class CollisionManager
                             if (depth.X < 0) // Right wall collision
                             {
                                 entity1.Collision[1] = true;
-                                entity1.Pos_X = Tile.Left - entity1.Width + 0.2f; // weird value, but without it player vibrates when walking into a wall?
+                                entity1.Pos_X =
+                                    Tile.Left - entity1.Width +
+                                    0.2f; // weird value, but without it player vibrates when walking into a wall?
                                 if (entity1.Type != "player")
                                     entity1.walk_speed = -entity1.walk_speed;
                             }
+
                             if (depth.X > 0) // Left wall collision
                             {
                                 entity1.Collision[2] = true;
@@ -157,13 +103,15 @@ public class CollisionManager
                     }
                 }
             }
+
             foreach (IGameEntity entity2 in _entities.OrderBy(e => e.UpdateOrder))
             {
                 if (entity1 == entity2)
                     continue;
                 if (entity1.Type == "ded" || entity2.Type == "ded")
                     continue;
-                Rectangle entity2_rect = new((int)entity2.Pos_X, (int)entity2.Pos_Y, (int)entity2.Width, (int)entity2.Height);
+                Rectangle entity2_rect = new((int)entity2.Pos_X, (int)entity2.Pos_Y, (int)entity2.Width,
+                    (int)entity2.Height);
                 Vector2 depth = RectangleExtensions.GetIntersectionDepth(entity1_rect, entity2_rect);
                 if (depth == Vector2.One)
                     continue;
@@ -181,6 +129,7 @@ public class CollisionManager
                     entity1.remove = true;
                     continue;
                 }
+
                 if (depth != Vector2.Zero && entity1.Type == "player" && entity2.Type == "fflower")
                 {
                     entity1.Health = Health.Flower;
@@ -203,6 +152,7 @@ public class CollisionManager
                 {
                     continue; //if they both give a coin, you get both so one of them does nothing 
                 }
+
                 if (depth != Vector2.Zero && (entity1.Type == "fireball" || entity2.Type == "fireball"))
                 {
                     if (entity1.Type == "player" || entity2.Type == "player")
@@ -266,6 +216,7 @@ public class CollisionManager
                                 entity1.walk_speed = -entity1.walk_speed;
                             }
                         }
+
                         if (depth.X > 0) // Entity1 on the right of Entity2
                         {
                             entity1.Collision[2] = true;
@@ -280,7 +231,6 @@ public class CollisionManager
                                 entity1.walk_speed = -entity1.walk_speed;
                             }
                         }
-
                     }
                 }
             }

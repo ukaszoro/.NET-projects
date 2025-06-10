@@ -1,14 +1,15 @@
 using Microsoft.Xna.Framework;
 using System;
+
 namespace Platformer2D;
 
 public static class RectangleExtensions
 {
-
     // A cool function that returns the Vector of how deep are two rectangles intersecting with eachother
     // Used in collision checking
-    
-    public static Vector2 GetIntersectionDepth(this Rectangle rectA, Rectangle rectB)     {
+
+    public static Vector2 GetIntersectionDepth(this Rectangle rectA, Rectangle rectB)
+    {
         // Calculate half sizes.
         float halfWidthA = rectA.Width / 2.0f;
         float halfHeightA = rectA.Height / 2.0f;
